@@ -143,7 +143,7 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                   <Input
                     placeholder="Legal entity name"
                     {...field}
-                    className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
+                    className="glass-card border-white/10"
                   />
                 </FormControl>
                 <FormMessage />
@@ -190,11 +190,11 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
+                    <SelectTrigger className="glass-card border-white/10">
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
+                  <SelectContent className="glass-card border-white/10">
                     <SelectItem value="Low">Low</SelectItem>
                     <SelectItem value="Medium">Medium</SelectItem>
                     <SelectItem value="High">High</SelectItem>
@@ -217,11 +217,11 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
+                    <SelectTrigger className="glass-card border-white/10">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
+                  <SelectContent className="glass-card border-white/10">
                     <SelectItem value="New">New</SelectItem>
                     <SelectItem value="Contacted">Contacted</SelectItem>
                     <SelectItem value="Qualified">Qualified</SelectItem>
@@ -247,11 +247,11 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
+                    <SelectTrigger className="glass-card border-white/10">
                       <SelectValue placeholder="Select contact method" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
+                  <SelectContent className="glass-card border-white/10">
                     <SelectItem value="Email">Email</SelectItem>
                     <SelectItem value="Phone">Phone</SelectItem>
                     <SelectItem value="LinkedIn">LinkedIn</SelectItem>
@@ -276,7 +276,7 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                     type="email"
                     placeholder="contact@company.com"
                     {...field}
-                    className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
+                    className="glass-card border-white/10"
                   />
                 </FormControl>
                 <FormMessage />
@@ -294,7 +294,7 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                   <Input
                     placeholder="+1 (555) 123-4567"
                     {...field}
-                    className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
+                    className="glass-card border-white/10"
                   />
                 </FormControl>
                 <FormMessage />
@@ -318,7 +318,7 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                         e.target.value ? Number(e.target.value) : undefined,
                       )
                     }
-                    className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
+                    className="glass-card border-white/10"
                   />
                 </FormControl>
                 <FormMessage />
@@ -337,11 +337,11 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
+                    <SelectTrigger className="glass-card border-white/10">
                       <SelectValue placeholder="Select AI agent" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
+                  <SelectContent className="glass-card border-white/10">
                     {aiAgents.map((agent) => (
                       <SelectItem key={agent} value={agent}>
                         {agent}
@@ -365,7 +365,7 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                 <Textarea
                   placeholder="Additional information about this lead..."
                   {...field}
-                  className="glass-card border-white/10 min-h-[100px]"
+                  className="glass-card border-white/10 dark:border-white/10 border-gray-200/50 min-h-[100px]"
                 />
               </FormControl>
               <FormMessage />

@@ -311,7 +311,7 @@ const Products = () => {
               Add Product
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-card border-white/10 max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50 max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Package className="w-5 h-5" />

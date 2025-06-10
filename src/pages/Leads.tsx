@@ -138,7 +138,10 @@ const columns = [
     label: "Industry",
     sortable: true,
     render: (value: string) => (
-      <Badge variant="outline" className="glass-card border-white/20">
+      <Badge
+        variant="outline"
+        className="glass-card border-white/20 dark:border-white/20 border-gray-300/50"
+      >
         {value}
       </Badge>
     ),
@@ -253,7 +256,7 @@ const Leads = () => {
               Add Lead
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-card border-white/10 max-w-2xl">
+          <DialogContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50 max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
