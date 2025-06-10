@@ -306,7 +306,7 @@ const Products = () => {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="cyber-gradient hover:opacity-90 transition-opacity">
+            <Button className="cyber-gradient hover:opacity-90 transition-all duration-300 hover:shadow-lg dark:hover:neon-glow text-white font-medium">
               <Plus className="w-4 h-4 mr-2" />
               Add Product
             </Button>

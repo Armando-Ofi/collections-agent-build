@@ -84,10 +84,10 @@ const DashboardSidebar = () => {
                   <Link
                     to={item.url}
                     className={cn(
-                      "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
-                      "hover:bg-white/10 hover:text-foreground",
+                      "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300",
+                      "hover:bg-white/10 hover:text-foreground dark:hover:bg-white/10 hover:bg-gray-100/50",
                       isActive &&
-                        "bg-gradient-to-r from-primary/20 to-accent/20 text-foreground neon-glow",
+                        "bg-gradient-to-r from-primary/20 to-accent/20 text-foreground dark:neon-glow border border-primary/30 dark:border-primary/50",
                     )}
                   >
                     <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />

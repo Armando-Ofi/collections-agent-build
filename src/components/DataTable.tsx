@@ -112,13 +112,14 @@ const DataTable = ({
       <div className="glass-card rounded-xl border border-white/10 dark:border-white/10 border-gray-200/50 overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/10 dark:border-white/10 border-gray-200/50 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-gray-100/50">
+            <TableRow className="border-white/10 dark:border-white/10 border-gray-200/50 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-gray-50/50">
               {columns.map((column) => (
                 <TableHead
                   key={column.key}
                   className={cn(
-                    "text-muted-foreground font-medium",
-                    column.sortable && "cursor-pointer hover:text-foreground",
+                    "text-muted-foreground font-medium transition-colors",
+                    column.sortable &&
+                      "cursor-pointer hover:text-foreground dark:hover:text-primary",
                   )}
                   onClick={() => column.sortable && handleSort(column.key)}
                 >
@@ -135,7 +136,7 @@ const DataTable = ({
             {sortedData.map((row, index) => (
               <TableRow
                 key={index}
-                className="border-white/10 dark:border-white/10 border-gray-200/50 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-gray-100/50 transition-colors"
+                className="border-white/10 dark:border-white/10 border-gray-200/50 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-gray-50/50 transition-all duration-200 dark:hover:shadow-lg"
               >
                 {columns.map((column) => (
                   <TableCell key={column.key} className="text-foreground">

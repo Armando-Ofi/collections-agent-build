@@ -131,7 +131,7 @@ const Overview = () => {
 
       {/* Charts Section */}
       <Tabs defaultValue="sales" className="space-y-6">
-        <TabsList className="glass-card w-full justify-start p-1">
+        <TabsList className="glass-card w-full justify-start p-1 dark:bg-white/5 bg-gray-50/50">
           <TabsTrigger value="sales" className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
             Sales Performance

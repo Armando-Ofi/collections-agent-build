@@ -435,7 +435,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
         <div className="flex justify-end gap-4">
           <Button
             type="submit"
-            className="cyber-gradient hover:opacity-90 transition-opacity"
+            className="cyber-gradient hover:opacity-90 transition-all duration-300 hover:shadow-lg dark:hover:neon-glow text-white font-medium"
           >
             Add Product
           </Button>
