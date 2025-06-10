@@ -125,7 +125,7 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                   <Input
                     placeholder="Enter company name"
                     {...field}
-                    className="glass-card border-white/10"
+                    className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -162,11 +162,11 @@ const LeadsForm = ({ onSubmit, initialData }: LeadsFormProps) => {
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="glass-card border-white/10">
+                    <SelectTrigger className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                       <SelectValue placeholder="Select industry" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="glass-card border-white/10">
+                  <SelectContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                     {industries.map((industry) => (
                       <SelectItem key={industry} value={industry}>
                         {industry}

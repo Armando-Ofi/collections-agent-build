@@ -101,7 +101,7 @@ const DataTable = ({
             placeholder={searchPlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 glass-card border-white/10"
+            className="pl-10 glass-card border-white/10 dark:border-white/10 border-gray-200/50"
           />
         </div>
         <Badge variant="secondary" className="glass-card">
@@ -109,10 +109,10 @@ const DataTable = ({
         </Badge>
       </div>
 
-      <div className="glass-card rounded-xl border border-white/10 overflow-hidden">
+      <div className="glass-card rounded-xl border border-white/10 dark:border-white/10 border-gray-200/50 overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/10 hover:bg-white/5">
+            <TableRow className="border-white/10 dark:border-white/10 border-gray-200/50 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-gray-100/50">
               {columns.map((column) => (
                 <TableHead
                   key={column.key}
@@ -135,7 +135,7 @@ const DataTable = ({
             {sortedData.map((row, index) => (
               <TableRow
                 key={index}
-                className="border-white/10 hover:bg-white/5 transition-colors"
+                className="border-white/10 dark:border-white/10 border-gray-200/50 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-gray-100/50 transition-colors"
               >
                 {columns.map((column) => (
                   <TableCell key={column.key} className="text-foreground">
@@ -153,7 +153,7 @@ const DataTable = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="glass-card border-white/10"
+                      className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
                     >
                       {onView && (
                         <DropdownMenuItem

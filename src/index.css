@@ -4,6 +4,47 @@
 
 @layer base {
   :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 263 70% 50%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 142 76% 36%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 263 70% 50%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 263 70% 50%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
@@ -90,6 +131,23 @@
 
   body {
     @apply bg-background text-foreground;
+    min-height: 100vh;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  body:not(.dark) {
+    background: linear-gradient(
+      135deg,
+      hsl(220 13% 96%) 0%,
+      hsl(263 70% 95%) 25%,
+      hsl(142 76% 92%) 50%,
+      hsl(220 13% 96%) 100%
+    );
+  }
+
+  body.dark {
     background: linear-gradient(
       135deg,
       hsl(240 10% 3.9%) 0%,
@@ -97,17 +155,32 @@
       hsl(280 60% 6%) 50%,
       hsl(240 10% 3.9%) 100%
     );
-    min-height: 100vh;
   }
 }
 
 @layer utilities {
   .glass-card {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl;
+    @apply backdrop-blur-xl shadow-2xl transition-all duration-300;
+  }
+
+  .glass-card:not(.dark *) {
+    @apply bg-white/70 border border-gray-200/50;
+  }
+
+  .dark .glass-card {
+    @apply bg-white/5 border border-white/10;
   }
 
   .glass-sidebar {
-    @apply backdrop-blur-xl bg-black/20 border-r border-white/10;
+    @apply backdrop-blur-xl border-r transition-all duration-300;
+  }
+
+  .glass-sidebar:not(.dark *) {
+    @apply bg-white/80 border-r-gray-200/50;
+  }
+
+  .dark .glass-sidebar {
+    @apply bg-black/20 border-r-white/10;
   }
 
   .neon-glow {

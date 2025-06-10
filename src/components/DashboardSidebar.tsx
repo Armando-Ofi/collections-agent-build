@@ -18,6 +18,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "./ThemeToggle";
 
 const navigation = [
   {
@@ -52,17 +53,20 @@ const DashboardSidebar = () => {
   return (
     <Sidebar className="glass-sidebar border-r-0" variant="sidebar">
       <SidebarHeader className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-10 h-10 rounded-xl cyber-gradient flex items-center justify-center">
-              <Bot className="w-5 h-5 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-xl cyber-gradient flex items-center justify-center">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background animate-pulse" />
             </div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background animate-pulse" />
+            <div>
+              <h1 className="text-lg font-bold text-foreground">SalesAI Pro</h1>
+              <p className="text-sm text-muted-foreground">Agent Dashboard</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground">SalesAI Pro</h1>
-            <p className="text-sm text-muted-foreground">Agent Dashboard</p>
-          </div>
+          <ThemeToggle />
         </div>
       </SidebarHeader>
 
