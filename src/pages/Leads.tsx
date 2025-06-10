@@ -278,6 +278,8 @@ const Leads = () => {
                 Add Lead
               </Button>
             </DialogTrigger>
+          </Dialog>
+        </div>
           <DialogContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50 max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
