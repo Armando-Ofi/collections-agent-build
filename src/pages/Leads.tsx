@@ -278,19 +278,18 @@ const Leads = () => {
                 Add Lead
               </Button>
             </DialogTrigger>
+            <DialogContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50 max-w-2xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Add New Lead
+                </DialogTitle>
+              </DialogHeader>
+              <LeadsForm onSubmit={handleAddLead} />
+            </DialogContent>
           </Dialog>
         </div>
-          <DialogContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50 max-w-2xl">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                Add New Lead
-              </DialogTitle>
-            </DialogHeader>
-            <LeadsForm onSubmit={handleAddLead} />
-          </DialogContent>
-          </Dialog>
-        </div>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
