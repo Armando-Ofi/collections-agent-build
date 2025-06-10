@@ -23,6 +23,7 @@ import {
   Eye,
   Edit,
   Trash2,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ interface DataTableProps {
   onView?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onSuggestions?: (row: any) => void;
   searchPlaceholder?: string;
   className?: string;
 }
@@ -49,6 +51,7 @@ const DataTable = ({
   onView,
   onEdit,
   onDelete,
+  onSuggestions,
   searchPlaceholder = "Search...",
   className,
 }: DataTableProps) => {
@@ -156,6 +159,15 @@ const DataTable = ({
                       align="end"
                       className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
                     >
+                      {onSuggestions && (
+                        <DropdownMenuItem
+                          onClick={() => onSuggestions(row)}
+                          className="flex items-center gap-2 text-primary hover:text-primary"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          AI Suggestions
+                        </DropdownMenuItem>
+                      )}
                       {onView && (
                         <DropdownMenuItem
                           onClick={() => onView(row.id)}

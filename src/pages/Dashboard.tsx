@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import DashboardSidebar from "@/components/DashboardSidebar";
+import FloatingAIButton from "@/components/FloatingAIButton";
 import Overview from "./Overview";
 import Leads from "./Leads";
 import Products from "./Products";
@@ -22,6 +23,7 @@ const Dashboard = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+        <FloatingAIButton />
       </div>
     </SidebarProvider>
   );

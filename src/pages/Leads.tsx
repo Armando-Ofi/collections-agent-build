@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import DataTable from "@/components/DataTable";
 import LeadsForm from "@/components/LeadsForm";
+import { useChatbotContext } from "@/components/ChatbotProvider";
 import { Lead } from "@/types";
 import {
   Plus,
@@ -23,6 +24,7 @@ import {
   Video,
   User,
   MessageCircle,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -208,6 +210,7 @@ const columns = [
 const Leads = () => {
   const [leads, setLeads] = useState<Lead[]>(mockLeads);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { openChatbot } = useChatbotContext();
 
   const handleAddLead = (newLead: Omit<Lead, "id">) => {
     const lead: Lead = {
@@ -230,6 +233,16 @@ const Leads = () => {
     setLeads(leads.filter((lead) => lead.id !== id));
   };
 
+  const handleSuggestions = (lead: Lead) => {
+    openChatbot({
+      name: lead.name,
+      industry: lead.industry,
+      effectiveness: lead.effectivenessPercentage,
+      status: lead.status,
+      priority: lead.priority,
+    });
+  };
+
   const totalValue = leads.reduce(
     (sum, lead) => sum + (lead.estimatedValue || 0),
     0,
@@ -249,13 +262,22 @@ const Leads = () => {
             Manage and track your potential clients with AI-powered insights
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="cyber-gradient hover:opacity-90 transition-all duration-300 hover:shadow-lg dark:hover:neon-glow text-white font-medium">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Lead
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => openChatbot()}
+            variant="outline"
+            className="glass-card border-primary/30 hover:bg-primary/10 text-primary hover:text-primary"
+          >
+            <Bot className="w-4 h-4 mr-2" />
+            AI Assistant
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="cyber-gradient hover:opacity-90 transition-all duration-300 hover:shadow-lg dark:hover:neon-glow text-white font-medium">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Lead
+              </Button>
+            </DialogTrigger>
           <DialogContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50 max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -329,6 +351,7 @@ const Leads = () => {
         onView={handleView}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onSuggestions={handleSuggestions}
         searchPlaceholder="Search leads..."
       />
     </div>
