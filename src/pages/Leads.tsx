@@ -22,7 +22,7 @@ import {
   MessageSquare,
   Video,
   User,
-  WhatsApp,
+  MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -121,7 +121,7 @@ const getContactMethodIcon = (method: string) => {
     case "Video Call":
       return <Video className="w-3 h-3" />;
     case "WhatsApp":
-      return <WhatsApp className="w-3 h-3" />;
+      return <MessageCircle className="w-3 h-3" />;
     default:
       return <MessageSquare className="w-3 h-3" />;
   }
