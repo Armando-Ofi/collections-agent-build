@@ -289,8 +289,8 @@ const Leads = () => {
             </DialogHeader>
             <LeadsForm onSubmit={handleAddLead} />
           </DialogContent>
-        </Dialog>
-      </div>
+          </Dialog>
+        </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
