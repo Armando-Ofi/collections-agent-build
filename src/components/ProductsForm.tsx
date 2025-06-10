@@ -118,7 +118,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column */}
           <div className="space-y-6">
-            <Card className="glass-card border-white/10">
+            <Card className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
               <CardHeader>
                 <CardTitle className="text-lg">Basic Information</CardTitle>
               </CardHeader>
@@ -133,7 +133,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
                         <Input
                           placeholder="Enter product name"
                           {...field}
-                          className="glass-card border-white/10"
+                          className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
                         />
                       </FormControl>
                       <FormMessage />
@@ -152,11 +152,11 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="glass-card border-white/10">
+                          <SelectTrigger className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                             <SelectValue placeholder="Select agent type" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="glass-card border-white/10">
+                        <SelectContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                           <SelectItem value="Sales">Sales</SelectItem>
                           <SelectItem value="Support">Support</SelectItem>
                           <SelectItem value="Marketing">Marketing</SelectItem>
@@ -179,11 +179,11 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="glass-card border-white/10">
+                          <SelectTrigger className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="glass-card border-white/10">
+                        <SelectContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                           <SelectItem value="Active">Active</SelectItem>
                           <SelectItem value="Inactive">Inactive</SelectItem>
                           <SelectItem value="Development">
@@ -199,7 +199,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card border-white/10">
+            <Card className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
               <CardHeader>
                 <CardTitle className="text-lg">Pricing & Licensing</CardTitle>
               </CardHeader>
@@ -219,7 +219,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }
-                            className="glass-card border-white/10"
+                            className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
                           />
                         </FormControl>
                         <FormMessage />
@@ -238,11 +238,11 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="glass-card border-white/10">
+                            <SelectTrigger className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="glass-card border-white/10">
+                          <SelectContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                             <SelectItem value="USD">USD</SelectItem>
                             <SelectItem value="EUR">EUR</SelectItem>
                             <SelectItem value="GBP">GBP</SelectItem>
@@ -269,7 +269,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }
-                            className="glass-card border-white/10"
+                            className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
                           />
                         </FormControl>
                         <FormMessage />
@@ -291,7 +291,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
                             }
-                            className="glass-card border-white/10"
+                            className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
                           />
                         </FormControl>
                         <FormMessage />
@@ -305,7 +305,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
 
           {/* Right Column */}
           <div className="space-y-6">
-            <Card className="glass-card border-white/10">
+            <Card className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
               <CardHeader>
                 <CardTitle className="text-lg">Industries</CardTitle>
               </CardHeader>
@@ -318,11 +318,11 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
                       <FormLabel>Target Industries</FormLabel>
                       <Select onValueChange={addIndustry}>
                         <FormControl>
-                          <SelectTrigger className="glass-card border-white/10">
+                          <SelectTrigger className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                             <SelectValue placeholder="Add industry" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="glass-card border-white/10">
+                        <SelectContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
                           {industries
                             .filter(
                               (industry) =>
@@ -357,7 +357,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
               </CardContent>
             </Card>
 
-            <Card className="glass-card border-white/10">
+            <Card className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
               <CardHeader>
                 <CardTitle className="text-lg">Features</CardTitle>
               </CardHeader>
@@ -373,7 +373,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
                             <Input
                               placeholder="Enter feature"
                               {...field}
-                              className="glass-card border-white/10"
+                              className="glass-card border-white/10 dark:border-white/10 border-gray-200/50"
                             />
                           </FormControl>
                           <FormMessage />
@@ -407,7 +407,7 @@ const ProductsForm = ({ onSubmit, initialData }: ProductsFormProps) => {
           </div>
         </div>
 
-        <Card className="glass-card border-white/10">
+        <Card className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
           <CardHeader>
             <CardTitle className="text-lg">Description</CardTitle>
           </CardHeader>
