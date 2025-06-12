@@ -182,7 +182,7 @@
   }
 
   .dark .glass-sidebar {
-    @apply bg-black/20 border-r-white/10;
+    @apply bg-black/20
   }
 
   .neon-glow {

@@ -1,0 +1,47 @@
+
+import { Lead } from "@/shared/types";
+
+export const mockLeads: Lead[] = [
+  {
+    id: '1',
+    name: 'Juan Pérez',
+    company: 'Tech Solutions SA',
+    industry: 'Technology',
+    priority: 'High',
+    status: 'New',
+    contactMethod: 'Email',
+    notes: 'Interested in enterprise solutions',
+    effectiveness: 85,
+    lastContact: '2025-06-08T10:30:00Z',
+    createdAt: '2025-06-01T09:00:00Z',
+    updatedAt: '2025-06-08T10:30:00Z',
+  },
+  {
+    id: '2',
+    name: 'María González',
+    company: 'Innovate Corp',
+    industry: 'Healthcare',
+    priority: 'Medium',
+    status: 'Qualified',
+    contactMethod: 'Phone',
+    notes: 'Follow up next week',
+    effectiveness: 72,
+    lastContact: '2025-06-07T14:15:00Z',
+    createdAt: '2025-06-02T11:20:00Z',
+    updatedAt: '2025-06-07T14:15:00Z',
+  },
+  {
+    id: '3',
+    name: 'Carlos Ruiz',
+    company: 'Digital Marketing Pro',
+    industry: 'Marketing',
+    priority: 'Low',
+    status: 'Proposal',
+    contactMethod: 'Email',
+    notes: 'Needs more information about pricing',
+    effectiveness: 45,
+    lastContact: '2025-06-05T16:45:00Z',
+    createdAt: '2025-06-03T13:10:00Z',
+    updatedAt: '2025-06-05T16:45:00Z',
+  },
+];
