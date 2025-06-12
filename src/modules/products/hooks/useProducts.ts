@@ -102,9 +102,9 @@ export const useProducts = (initialFilters: ProductsFilters = {}) => {
     }
   }, [updateProduct]);
 
-  const handleDeleteProduct = useCallback(async (id: number) => {
+  const handleDeleteProduct = useCallback(async (id: string) => {
     try {
-      await deleteProduct(id).unwrap();
+      await deleteProduct(Number(id)).unwrap();
       return { success: true };
     } catch (error) {
       return { success: false, error };

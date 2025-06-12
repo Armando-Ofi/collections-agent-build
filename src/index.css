@@ -163,7 +163,7 @@
   }
 
   .glass-card:not(.dark *) {
-    @apply bg-white/90 border border-gray-200/60 shadow-sm;
+    @apply bg-white/90 border border-gray-300/60 shadow-sm;
   }
 
   .dark .glass-card {

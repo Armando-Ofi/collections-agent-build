@@ -13,6 +13,7 @@ import {
   Users,
   Package,
   Contact,
+  Building,
   Bot,
   Zap,
   TrendingUp,
@@ -40,6 +41,12 @@ const navigation = [
     description: "AI Agents & Services",
   },
   {
+    title: "Companies",
+    url: "/companies",
+    icon: Building,
+    description: "Company Database",
+  },
+  {
     title: "Contacts",
     url: "/contacts",
     icon: Contact,
@@ -62,7 +69,7 @@ const DashboardSidebar = () => {
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background animate-pulse" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">Argo Sales</h1>
+              <h1 className="text-lg font-bold text-foreground">SalesAI Pro</h1>
               <p className="text-sm text-muted-foreground">Agent Dashboard</p>
             </div>
           </div>
@@ -85,7 +92,7 @@ const DashboardSidebar = () => {
                     to={item.url}
                     className={cn(
                       "group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300",
-                      "hover:bg-white/10 hover:text-foreground dark:hover:bg-white/10 hover:bg-gray-100/50",
+                      "hover:text-foreground dark:hover:bg-white/10 hover:bg-gray-100/50",
                       isActive &&
                         "bg-gradient-to-r from-primary/20 to-accent/20 text-foreground dark:neon-glow border border-primary/30 dark:border-primary/50",
                     )}

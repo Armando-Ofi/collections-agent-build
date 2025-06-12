@@ -33,8 +33,8 @@ const ProductsPage: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCloneDialogOpen, setIsCloneDialogOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<number>(0);
-  const [showFilters, setShowFilters] = useState(false);
-  const { openChatbot } = useChatbotContext();
+  //const [showFilters, setShowFilters] = useState(false);
+  //const { openChatbot } = useChatbotContext();
   
   // Custom hook with all products logic
   const {
@@ -42,14 +42,14 @@ const ProductsPage: React.FC = () => {
     stats,
     isLoading,
     createProduct,
-    updateProduct,
+    //updateProduct,
     deleteProduct,
     cloneProduct,
     error,
     refetch,
     getDeveloperStats,
     getIndustryDistribution,
-    searchInProducts,
+    //searchInProducts,
   } = useProducts();
 
   // Event handlers
@@ -60,17 +60,17 @@ const ProductsPage: React.FC = () => {
     }
   };
 
-  const handleView = (id: number) => {
+  const handleView = (id: string) => {
     console.log('View product:', id);
     // Navigate to product detail view
   };
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string) => {
     console.log('Edit product:', id);
     // Open edit dialog or navigate to edit page
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       await deleteProduct(id);
     }
@@ -131,7 +131,7 @@ const ProductsPage: React.FC = () => {
                 Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50 max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="glass-card dark:border-white/10 border-gray-200/50 max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Package className="w-5 h-5" />
@@ -293,12 +293,12 @@ const ProductsPage: React.FC = () => {
         onView={handleView}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onClone={handleClone}
+        onClone={() => {}}
       />
 
       {/* Clone Product Dialog */}
       <Dialog open={isCloneDialogOpen} onOpenChange={setIsCloneDialogOpen}>
-        <DialogContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50">
+        <DialogContent className="glass-card  dark:border-white/10 border-gray-200/50">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Copy className="w-5 h-5" />

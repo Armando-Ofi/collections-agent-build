@@ -20,6 +20,7 @@ export interface Lead {
 export interface CreateLeadRequest {
   name: string;
   industry: string;
+  probabilityToLand: number;
   priority: Lead['priority'];
   status: Lead['status'];
   contactMethod: Lead['contactMethod'];

@@ -32,7 +32,7 @@ export const useLeadLogs = (leadId: string | null): UseLeadLogsReturn => {
     
     try {
       // TODO: Replace with your actual API endpoint
-      const response = await fetch(`https://sales-agent.api.sofiatechnology.ai/api/v1/email-log/${leadId}/`);
+      const response = await fetch(`https://sales-agent.api.sofiatechnology.ai/api/v1/lead/${leadId}/email-logs/`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
