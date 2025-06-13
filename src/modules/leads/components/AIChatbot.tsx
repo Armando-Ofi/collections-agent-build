@@ -29,6 +29,7 @@ interface AIChatbotProps {
 
 const AIChatbot = ({ isOpen, onClose, leadId, leadContext }: AIChatbotProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatbotRef = useRef<HTMLDivElement>(null);
   const { message, isLoading, error, refetch } = useAISalesAssistant({
     leadId,
     isOpen,
@@ -41,6 +42,25 @@ const AIChatbot = ({ isOpen, onClose, leadId, leadContext }: AIChatbotProps) => 
   useEffect(() => {
     scrollToBottom();
   }, [message, isLoading]);
+
+  // Prevent body scroll when chatbot is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup on unmount or when isOpen changes
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  // Prevent scroll propagation
+  const handleWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+  };
 
   // Function to parse HTML content and render it as structured React components
   const renderHTMLContent = (htmlContent: string) => {
@@ -249,6 +269,7 @@ const AIChatbot = ({ isOpen, onClose, leadId, leadContext }: AIChatbotProps) => 
 
           {/* Chatbot Panel */}
           <motion.div
+            ref={chatbotRef}
             initial={{ x: "100%", opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: "100%", opacity: 0 }}
@@ -259,10 +280,11 @@ const AIChatbot = ({ isOpen, onClose, leadId, leadContext }: AIChatbotProps) => 
               duration: 0.4,
             }}
             className="fixed right-0 top-0 h-full w-full max-w-md z-50 flex flex-col"
+            onWheel={handleWheel}
           >
             <Card className="glass-card h-full border-l  dark:border-white/10 border-gray-200/50 rounded-none rounded-l-xl shadow-2xl">
               {/* Header */}
-              <CardHeader className="border-b  dark:border-white/10 border-gray-200/50 p-4">
+              <CardHeader className="border-b  dark:border-white/10 border-gray-200/50 p-4 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full cyber-gradient flex items-center justify-center">
@@ -322,7 +344,7 @@ const AIChatbot = ({ isOpen, onClose, leadId, leadContext }: AIChatbotProps) => 
               </CardHeader>
 
               {/* Messages */}
-              <CardContent className="flex-1 p-0 overflow-hidden">
+              <CardContent className="flex-1 p-0 min-h-0">
                 <ScrollArea className="h-full">
                   <div className="p-4 space-y-4">
                     {/* Loading State */}
@@ -344,7 +366,7 @@ const AIChatbot = ({ isOpen, onClose, leadId, leadContext }: AIChatbotProps) => 
                         </div>
                         <div className="flex-1 min-w-0 rounded-lg p-4 glass-card overflow-hidden">
                           {/* Render HTML content as structured components */}
-                          <div className="max-w-none overflow-hidden">
+                          <div className="max-w-none ">
                             {renderHTMLContent(message.content)}
                           </div>
                           
@@ -382,7 +404,7 @@ const AIChatbot = ({ isOpen, onClose, leadId, leadContext }: AIChatbotProps) => 
               </CardContent>
 
               {/* Footer */}
-              <div className="border-t border-white/10 dark:border-white/10 border-gray-200/50 p-4">
+              <div className="border-t border-white/10 dark:border-white/10 border-gray-200/50 p-4 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
                     AI-powered sales recommendations

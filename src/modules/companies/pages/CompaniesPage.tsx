@@ -100,23 +100,13 @@ const columns = [
     ),
   },
   {
-    key: "company_url",
-    label: "Status",
-    render: (value: any, row: Company) => {
-      const completeness = CompaniesService.getProfileCompleteness(row);
-      return (
-        <div className="space-y-1">
-          <Badge
-            className={cn("border", CompaniesService.getStatusColor(value?.status || "unknown"))}
-          >
-            {value?.status || "No data"}
-          </Badge>
-          <div className="text-xs text-muted-foreground">
-            {completeness}% complete
-          </div>
-        </div>
-      );
-    },
+    key: "contact_info",
+    label: "Contact",
+    render: (value: string) => (
+      <div className="text-sm font-medium text-foreground">
+        {value}
+      </div>
+    ),
   },
 ];
 
