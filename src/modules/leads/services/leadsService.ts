@@ -53,3 +53,12 @@ export class LeadsService {
     return 'bg-red-500';
   }
 }
+
+export const getPriorityValue = (priority: string): number => {
+  switch (priority.toLowerCase()) {
+    case 'High': return 3;
+    case 'Medium': return 2;
+    case 'Low': return 1;
+    default: return 0;
+  }
+};

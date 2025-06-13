@@ -139,6 +139,7 @@ const CompaniesPage = () => {
     isUpdating,
     //isDeleting,
     error,
+    isCreatingByUrl,
     refetch,
     createCompany,
     createCompanyByUrl,
@@ -148,7 +149,7 @@ const CompaniesPage = () => {
 
   // Event handlers
   const handleView = (id: string) => {
-    const company = companies.find((c) => c.id.toString() === id);
+    const company = companies.find((c) => c.id === Number(id));
     if (company) {
       setSelectedCompany(company);
       setIsViewDialogOpen(true);
@@ -156,7 +157,7 @@ const CompaniesPage = () => {
   };
 
   const handleEdit = (id: string) => {
-    const company = companies.find((c) => c.id.toString() === id);
+    const company = companies.find((c) => c.id === Number(id));
     if (company) {
       setSelectedCompany(company);
       setIsEditDialogOpen(true);
@@ -244,7 +245,7 @@ const CompaniesPage = () => {
                   Add New Company
                 </DialogTitle>
               </DialogHeader>
-              <AddCompanyDialog onSubmit={handleAddCompany} onSubmitUrl={handleAddCompanyUrl} />
+              <AddCompanyDialog onSubmit={handleAddCompany} onSubmitUrl={handleAddCompanyUrl} isAnalyzing={isCreatingByUrl} />
             </DialogContent>
           </Dialog>
         </div>

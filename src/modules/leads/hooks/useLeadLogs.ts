@@ -1,4 +1,4 @@
-
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 
 export interface LeadLog {
@@ -32,13 +32,13 @@ export const useLeadLogs = (leadId: string | null): UseLeadLogsReturn => {
     
     try {
       // TODO: Replace with your actual API endpoint
-      const response = await fetch(`https://sales-agent.api.sofiatechnology.ai/api/v1/lead/${leadId}/email-logs/`);
+      const response = await axios.get(`https://sales-agent.api.sofiatechnology.ai/api/v1/lead/${leadId}/email-logs`);
       
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
+      const data = await response.data;
       setLogs(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch logs');

@@ -5,7 +5,8 @@ import type { Lead, CreateLeadRequest, UpdateLeadRequest, LeadsStats, LeadsFilte
 // Definir las URLs de endpoints como constantes
 const ENDPOINTS = {
   LEADS: '/lead/',
-  LEAD_BY_ID: (id: string) => `/leads/${id}`,
+  TAKE_FIRST_ACTIONS: 'https://n8n.sofiatechnology.ai/webhook/1053bef0-5a55-47a2-ab5e-4983c8a3d0ea',
+  LEAD_BY_ID: (id: string) => `/lead/${id}`,
   LEADS_STATS: '/leads/stats',
   LEADS_EXPORT: '/leads/export',
   LEADS_IMPORT: '/leads/import',
@@ -19,13 +20,13 @@ export interface Opportunity {
   id: number;
   status: Status;
   reason: string;
-  opportunityScore: string;
-  clientPriorityLevel: 'Low' | 'Medium' | 'High' | string; // Puedes refinar los valores posibles
-  lastContact: string | null;
+  opportunity_score: string;
+  client_priority_level: 'Low' | 'Medium' | 'High' | string; // Puedes refinar los valores posibles
+  last_contact: string | null;
   contactMethod: string | null;
   estimatedValue: number | null;
   aiAgentAssigned: string | null;
-  probabilityToLand: string | null;
+  probability_to_land: string | null;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
   company: {
@@ -100,11 +101,11 @@ export const leadsApi = baseApi.injectEndpoints({
           id: opportunity.id.toString(),
           name: opportunity.company?.name ?? 'Unknown',
           industry: opportunity.company?.industry ?? 'Unknown',
-          effectivenessPercentage: parseFloat(opportunity.opportunityScore) || 0,
-          probabilityToLand: parseFloat(opportunity.probabilityToLand) || 0,
-          priority: mapPriority(opportunity.clientPriorityLevel),
+          effectivenessPercentage: parseFloat(opportunity.opportunity_score) || 0,
+          probabilityToLand: parseFloat(opportunity.probability_to_land) || 0,
+          priority: mapPriority(opportunity.client_priority_level),
           status: opportunity.status,
-          lastContact: opportunity.lastContact ?? '',
+          lastContact: opportunity.last_contact ?? '',
           contactMethod: mapContactMethod(opportunity.contactMethod),
           email: opportunity.contact?.email ?? 'unknown@example.com',
           phone: opportunity.contact?.phone ?? undefined,
@@ -276,6 +277,14 @@ export const leadsApi = baseApi.injectEndpoints({
       },
     }),
 
+    takeFirstAction: builder.mutation<any, void>({
+      query: () => ({
+        url: ENDPOINTS.TAKE_FIRST_ACTIONS,
+      }),
+    }),
+
+    
+
     // DELETE /api/leads - Eliminación masiva
     bulkDeleteLeads: builder.mutation<{ deleted: number }, string[]>({
       query: (ids) => ({
@@ -397,6 +406,7 @@ export const {
   useGetLeadsStatsQuery,
   useGetLeadsAnalyticsQuery,
   
+  
   // Mutations
   useCreateLeadMutation,
   useUpdateLeadMutation,
@@ -405,6 +415,7 @@ export const {
   useBulkDeleteLeadsMutation,
   useImportLeadsMutation,
   useExportLeadsMutation,
+  useTakeFirstActionMutation,
   
   // Lazy queries
   useLazyGetLeadsQuery,

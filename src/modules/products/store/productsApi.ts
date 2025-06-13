@@ -9,7 +9,7 @@ import type {
 // Endpoints constants
 const ENDPOINTS = {
   PRODUCTS: '/product/',
-  PRODUCT_BY_ID: (id: number) => `/products/${id}`,
+  PRODUCT_BY_ID: (id: number) => `/product/${id}`,
   PRODUCTS_EXPORT: '/products/export',
   PRODUCTS_IMPORT: '/products/import',
   PRODUCTS_BULK_UPDATE: '/products/bulk-update',

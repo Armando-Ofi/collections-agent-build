@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@/shared/components/ui/badge';
 import DataTable from '@/shared/components/common/DataTable';
-import { LeadsService } from '../services/leadsService';
+import { getPriorityValue, LeadsService } from '../services/leadsService';
 import type { Lead } from '../types';
 import { cn } from '@/shared/lib/utils';
 import {
@@ -67,13 +67,13 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
               <div
                 className={cn(
                   'h-full rounded-full transition-all',
-                  value >= 12 ? 'bg-green-500' : 
-                  value >= 8 ? 'bg-yellow-500' : 'bg-red-500'
+                  value >= 80 ? 'bg-green-500' :
+                    value >= 50 ? 'bg-yellow-500' : 'bg-red-500'
                 )}
-                style={{ width: `${(value / 15) * 100}%` }}
+                style={{ width: `${value}%` }}
               />
             </div>
-            <span className="text-sm font-medium">{value}</span>
+            <span className="text-sm font-medium">{value}%</span>
           </div>
         </div>
       ),
@@ -96,7 +96,7 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
     },
     {
       key: 'effectivenessPercentage',
-      label: 'Effectiveness',
+      label: 'Opportunity Score',
       sortable: true,
       render: (value: number) => (
         <div className="flex items-center gap-2">
@@ -106,12 +106,13 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
               <div
                 className={cn(
                   'h-full rounded-full transition-all',
-                  LeadsService.getEffectivenessColor(value)
+                  value >= 12 ? 'bg-green-500' :
+                    value >= 8 ? 'bg-yellow-500' : 'bg-red-500'
                 )}
-                style={{ width: `${value}%` }}
+                style={{ width: `${(value / 15) * 100}%` }}
               />
             </div>
-            <span className="text-sm font-medium">{value}%</span>
+            <span className="text-sm font-medium">{value}</span>
           </div>
         </div>
       ),
@@ -168,7 +169,7 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
         searchPlaceholder="Search leads..."
         loading={isLoading}
       />
-      
+
       {/* Quick Stats Footer */}
       {!isLoading && leads.length > 0 && (
         <div className="flex items-center justify-between p-4 glass-card rounded-lg text-sm text-muted-foreground">

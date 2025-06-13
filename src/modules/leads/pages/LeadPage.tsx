@@ -1,57 +1,55 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/shared/components/ui/dialog';
+import { Button } from '@/shared/components/ui/button';;
 import { useChatbotContext } from '@/shared/components/common/ChatbotProvider';
 import { LeadsTable } from '@/modules/leads/components/LeadsTable'
-import LeadsForm from '@/shared/components/common/LeadsForm'
 import LeadDetailsDialog from '@/modules/leads/components/LeadDetails' // Adjust path as needed
 import { useLeads } from '@/modules/leads/hooks/useLeads';
 import { LeadsService } from '@/modules/leads/services/leadsService';
-import type { Lead, CreateLeadRequest } from '@/modules/leads/types';
+import type { Lead } from '@/modules/leads/types';
+import AIChatbot from '../components/AIChatbot';
 import {
-  Plus,
   Users,
   TrendingUp,
   Target,
   Bot,
   RefreshCcw,
 } from 'lucide-react';
-import { useGetLeadsAnalyticsQuery } from '../store/leadsApi';
 import Error from '@/shared/components/common/Error';
 
 const LeadsPage: React.FC = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const { openChatbot } = useChatbotContext();
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   
+  // Add state for the selected lead for AI chatbot
+  const [selectedLeadForAI, setSelectedLeadForAI] = useState<Lead | null>(null);
+
   // Custom hook with all leads logic
   const {
     leads,
     isLoading,
-    createLead,
     updateLead,
     deleteLead,
+    takeFirstAction,
     error,
-    refetch
+    refetch,
+    isTakingFirstAction
   } = useLeads();
 
   // Stats query
   //const { data: stats } = useGetLeadsAnalyticsQuery();
 
   // Event handlers
-  const handleAddLead = async (newLead: CreateLeadRequest) => {
+  /*const handleAddLead = async (newLead: CreateLeadRequest) => {
     const result = await createLead(newLead);
     if (result.success) {
       setIsDialogOpen(false);
-    }
+      }
+      };*/
+
+  const handleOpenChatbot = (leadId: string) => {
+    // This function seems unused, but keeping it for consistency
   };
 
   const handleView = (id: string) => {
@@ -67,17 +65,32 @@ const LeadsPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteLead(id);
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      await deleteLead(id);
+    }
   };
 
   const handleSuggestions = (lead: Lead) => {
-    openChatbot({
-      name: lead.name,
-      industry: lead.industry,
-      effectiveness: lead.effectivenessPercentage,
-      status: lead.status,
-      priority: lead.priority,
-    });
+    // Set both the lead for AI and open the chatbot
+    setSelectedLeadForAI(lead);
+    setIsChatbotOpen(true);
+  };
+
+  const handleFirstAction = async () => {
+    await takeFirstAction();
+  };
+
+  // Helper function to format lead context for AI chatbot
+  const getLeadContextForAI = (lead: Lead) => {
+    if (!lead) return undefined;
+    
+    return {
+      name: lead.name || lead.company || 'Unknown',
+      industry: lead.industry || 'Unknown',
+      effectiveness: lead.effectivenessPercentage || 0,
+      status: lead.status || 'Unknown',
+      priority: lead.priority || 'Medium'
+    };
   };
 
   if (error) {
@@ -101,30 +114,18 @@ const LeadsPage: React.FC = () => {
             <RefreshCcw />
           </Button>
           <Button
-            onClick={() => {}}
+            disabled={isTakingFirstAction}
+            onClick={handleFirstAction}
             variant="outline"
-            className="glass-card border-primary/30 hover:bg-primary/10 text-primary hover:text-primary"
+            className="cyber-gradient hover:opacity-90 transition-all duration-300 hover:shadow-lg dark:hover:neon-glow text-white font-medium"
           >
-            <Bot className="w-4 h-4 mr-2" />
-            Take 1st Action
+            {isTakingFirstAction ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
+            ) : (
+              <Bot className="w-4 h-4 mr-2" />
+            )}
+            {isTakingFirstAction ? "Processing..." : "Take First Action"}
           </Button>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="cyber-gradient hover:opacity-90 transition-all duration-300 hover:shadow-lg dark:hover:neon-glow text-white font-medium">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Lead
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="glass-card border-white/10 dark:border-white/10 border-gray-200/50 max-w-2xl">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Add New Lead
-                </DialogTitle>
-              </DialogHeader>
-              <LeadsForm onSubmit={() => {}} />
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
 
@@ -197,6 +198,17 @@ const LeadsPage: React.FC = () => {
         lead={selectedLead}
         isOpen={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
+      />
+
+      {/* AI Chatbot */}
+      <AIChatbot
+        isOpen={isChatbotOpen}
+        onClose={() => {
+          setIsChatbotOpen(false);
+          setSelectedLeadForAI(null); // Clear selected lead when closing
+        }}
+        leadId={selectedLeadForAI?.id || ''}
+        leadContext={getLeadContextForAI(selectedLeadForAI)}
       />
     </div>
   );

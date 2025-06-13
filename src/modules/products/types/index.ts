@@ -31,23 +31,11 @@ export interface DBProduct {
 
 export interface CreateProductRequest {
   name: string;
-  industries: string[];
-  description: string;
-  price: number;
-  currency: string;
-  maxLicenses: number;
-  features: string[];
-  aiAgentType: Product['aiAgentType'];
-  status: Product['status'];
-  category?: string;
-  version?: string;
-  supportLevel?: Product['supportLevel'];
-  key_features?: string;
-  target_industries?: string;
-  developer?: string;
-  product_description?: string;
+  developer: string;
+  key_features: string;
+  target_industries: string;
+  product_description: string;
 }
-
 export interface UpdateProductRequest {
   id: string;
   name?: string;

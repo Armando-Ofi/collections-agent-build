@@ -8,9 +8,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/components/ui/dialog';
-import { useChatbotContext } from '@/shared/components/common/ChatbotProvider';
 import { ProductsTable } from '@/modules/products/components/ProductsTable';
-import ProductsForm from '@/shared/components/common/ProductsForm';
+import ProductsForm from '../components/ProductsForm';
 import { useProducts } from '@/modules/products/hooks/useProducts';
 import { ProductsService } from '@/modules/products/services/productsService';
 import type { CreateProductRequest } from '@/modules/products/types';
@@ -18,14 +17,11 @@ import {
   Plus,
   Package,
   TrendingUp,
-  Bot,
   Building,
   Target,
   Code,
   RefreshCcw,
   Copy,
-  Download,
-  Filter,
 } from 'lucide-react';
 import Error from '@/shared/components/common/Error';
 
@@ -91,7 +87,7 @@ const ProductsPage: React.FC = () => {
     }
   };
 
-  const handleExportCSV = () => {
+  /*const handleExportCSV = () => {
     const csvContent = ProductsService.exportToCSV(products);
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -100,7 +96,7 @@ const ProductsPage: React.FC = () => {
     a.download = `products-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+  };*/
 
   if (error) {
     return <Error title="Error loading Products" />

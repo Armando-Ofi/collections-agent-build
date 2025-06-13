@@ -26,7 +26,7 @@ const baseQuery = fetchBaseQuery({
     return headers;
   },
   // Timeout y retry logic
-  timeout: 60000,
+  timeout: 180000,
 });
 
 // Base query con retry logic y error handling
