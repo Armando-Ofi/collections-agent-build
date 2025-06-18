@@ -21,6 +21,7 @@ interface LeadsTableProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onSuggestions: (lead: Lead) => void;
+  onFirstAction: (id: string) => void;
 }
 
 const getContactMethodIcon = (method: string) => {
@@ -41,11 +42,24 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
   onEdit,
   onDelete,
   onSuggestions,
+  onFirstAction
 }) => {
   const columns = [
     {
       key: 'name',
       label: 'Company Name',
+      sortable: true,
+      render: (value: string) => (
+        <div className="max-w-48">
+          <div className="font-medium text-foreground truncate" title={value}>
+            {value}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'product',
+      label: 'Product',
       sortable: true,
       render: (value: string) => (
         <div className="max-w-48">
@@ -166,6 +180,7 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
         onEdit={onEdit}
         onDelete={onDelete}
         onSuggestions={onSuggestions}
+        onTakeFirstAction={onFirstAction}
         searchPlaceholder="Search leads..."
         loading={isLoading}
       />

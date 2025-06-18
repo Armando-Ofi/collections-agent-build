@@ -32,6 +32,7 @@ const LeadsPage: React.FC = () => {
     updateLead,
     deleteLead,
     takeFirstAction,
+    takeFirstActionById,
     error,
     refetch,
     isTakingFirstAction
@@ -78,6 +79,10 @@ const LeadsPage: React.FC = () => {
 
   const handleFirstAction = async () => {
     await takeFirstAction();
+  };
+
+  const handleFirstActionById = async (id: string) => {
+    await takeFirstActionById(id);
   };
 
   // Helper function to format lead context for AI chatbot
@@ -187,6 +192,7 @@ const LeadsPage: React.FC = () => {
       <LeadsTable
         leads={leads}
         isLoading={isLoading}
+        onFirstAction={handleFirstActionById}
         onView={handleView}
         onEdit={handleEdit}
         onDelete={handleDelete}

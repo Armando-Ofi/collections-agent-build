@@ -1,6 +1,7 @@
 export interface Lead {
   id: string;
   name: string;
+  product: string;
   industry: string;
   effectivenessPercentage: number;
   priority: 'Low' | 'Medium' | 'High' | 'Critical';

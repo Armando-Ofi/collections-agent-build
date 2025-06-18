@@ -6,7 +6,7 @@ import type { Company, CompanyFormData, CompanyKPIs } from '../types';
 const ENDPOINTS = {
   COMPANIES: '/company/',
   WEBHOOK_URL: 'https://n8n.sofiatechnology.ai/webhook/5c486541-e9b9-41d2-b6cf-054efbf324a4',
-  COMPANY_BY_ID: (id: string) => `/companies/${id}`,
+  COMPANY_BY_ID: (id: string) => `/company/${id}`,
   COMPANIES_STATS: '/companies/stats',
   COMPANIES_EXPORT: '/companies/export',
   COMPANIES_IMPORT: '/companies/import',

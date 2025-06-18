@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useMemo } from 'react';
-import { useGetLeadsQuery, useCreateLeadMutation, useUpdateLeadMutation, useDeleteLeadMutation, useTakeFirstActionMutation } from '../store/leadsApi';
+import { useGetLeadsQuery, useCreateLeadMutation, useUpdateLeadMutation, useDeleteLeadMutation, useTakeFirstActionMutation, useTakeFirstActionByIdMutation } from '../store/leadsApi';
 import type { LeadsFilters, CreateLeadRequest, UpdateLeadRequest } from '../types';
 
 export const useLeads = (initialFilters: LeadsFilters = {}) => {
@@ -16,6 +16,7 @@ export const useLeads = (initialFilters: LeadsFilters = {}) => {
 
   const [createLead, { isLoading: isCreating }] = useCreateLeadMutation();
   const [takeFirstAction, { isLoading: isTakingFirstAction }] = useTakeFirstActionMutation();
+  const [takeFirstActionById, { isLoading: isTakingFirstActionById }] = useTakeFirstActionByIdMutation();
   const [updateLead, { isLoading: isUpdating }] = useUpdateLeadMutation();
   const [deleteLead, { isLoading: isDeleting }] = useDeleteLeadMutation();
 
@@ -78,6 +79,15 @@ export const useLeads = (initialFilters: LeadsFilters = {}) => {
     }
   }, [createLead]);
 
+  const handleCreateFirstActionById = useCallback(async (id: string) => {
+    try {
+      await takeFirstActionById(id).unwrap();
+      return { success: true };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }, [createLead]);
+
   return {
     // Data
     leads,
@@ -101,6 +111,7 @@ export const useLeads = (initialFilters: LeadsFilters = {}) => {
     // Actions
     refetch,
     takeFirstAction: handleFirstActions,
+    takeFirstActionById: handleCreateFirstActionById,
     createLead: handleCreateLead,
     updateLead: handleUpdateLead,
     deleteLead: handleDeleteLead,

@@ -7,6 +7,7 @@ const ENDPOINTS = {
   LEADS: '/lead/',
   TAKE_FIRST_ACTIONS: 'https://n8n.sofiatechnology.ai/webhook/1053bef0-5a55-47a2-ab5e-4983c8a3d0ea',
   LEAD_BY_ID: (id: string) => `/lead/${id}`,
+  TAKE_FIRST_ACTION_BY_ID: (id: string) => `https://n8n.sofiatechnology.ai/webhook/1053bef0-5a55-47a2-ab5e-4983c8a3d0ea?id=${id}`,
   LEADS_STATS: '/leads/stats',
   LEADS_EXPORT: '/leads/export',
   LEADS_IMPORT: '/leads/import',
@@ -101,6 +102,7 @@ export const leadsApi = baseApi.injectEndpoints({
           id: opportunity.id.toString(),
           name: opportunity.company?.name ?? 'Unknown',
           industry: opportunity.company?.industry ?? 'Unknown',
+          product: opportunity.product?.name ?? 'Unknown',
           effectivenessPercentage: parseFloat(opportunity.opportunity_score) || 0,
           probabilityToLand: parseFloat(opportunity.probability_to_land) || 0,
           priority: mapPriority(opportunity.client_priority_level),
@@ -283,6 +285,12 @@ export const leadsApi = baseApi.injectEndpoints({
       }),
     }),
 
+    takeFirstActionById: builder.mutation<any, string>({
+      query: (id) => ({
+        url: ENDPOINTS.TAKE_FIRST_ACTION_BY_ID(id),
+      }),
+    }),
+
     
 
     // DELETE /api/leads - Eliminación masiva
@@ -416,6 +424,7 @@ export const {
   useImportLeadsMutation,
   useExportLeadsMutation,
   useTakeFirstActionMutation,
+  useTakeFirstActionByIdMutation,
   
   // Lazy queries
   useLazyGetLeadsQuery,

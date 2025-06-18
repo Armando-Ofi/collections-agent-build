@@ -404,7 +404,7 @@ const AIChatbot = ({ isOpen, onClose, leadId, leadContext }: AIChatbotProps) => 
               </CardContent>
 
               {/* Footer */}
-              <div className="border-t border-white/10 dark:border-white/10 border-gray-200/50 p-4 flex-shrink-0">
+              <div className="border-t dark:border-white/10 border-gray-200/50 p-4 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
                     AI-powered sales recommendations

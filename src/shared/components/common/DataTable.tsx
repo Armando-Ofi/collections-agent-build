@@ -24,6 +24,7 @@ import {
   Edit,
   Trash2,
   MessageSquare,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
@@ -41,6 +42,7 @@ interface DataTableProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onSuggestions?: (row: any) => void;
+  onTakeFirstAction?: (row: any) => void;
   searchPlaceholder?: string;
   className?: string;
   loading?: boolean;
@@ -53,6 +55,7 @@ const DataTable = ({
   onEdit,
   onDelete,
   onSuggestions,
+  onTakeFirstAction,
   searchPlaceholder = "Search...",
   className,
   loading = false,
@@ -193,7 +196,16 @@ const DataTable = ({
                       <DropdownMenuContent
                         align="end"
                         className="glass-card border-white/10 dark:border-white/10"
-                      >
+                        >
+                        {onTakeFirstAction && (
+                          <DropdownMenuItem
+                            onClick={() => onTakeFirstAction(row.id)}
+                            className="flex items-center gap-2 text-primary hover:text-red-400"
+                          >
+                            <Bot className="w-4 h-4" />
+                            1st Action
+                          </DropdownMenuItem>
+                        )}
                         {onSuggestions && (
                           <DropdownMenuItem
                             onClick={() => onSuggestions(row)}
