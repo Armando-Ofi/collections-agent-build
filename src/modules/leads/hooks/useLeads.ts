@@ -16,7 +16,7 @@ export const useLeads = (initialFilters: LeadsFilters = {}) => {
 
   const [createLead, { isLoading: isCreating }] = useCreateLeadMutation();
   const [takeFirstAction, { isLoading: isTakingFirstAction }] = useTakeFirstActionMutation();
-  const [takeFirstActionById, { isLoading: isTakingFirstActionById }] = useTakeFirstActionByIdMutation();
+  const [takeFirstActionById, { isLoading: isTakingFirstActionById, originalArgs}] = useTakeFirstActionByIdMutation();
   const [updateLead, { isLoading: isUpdating }] = useUpdateLeadMutation();
   const [deleteLead, { isLoading: isDeleting }] = useDeleteLeadMutation();
 
@@ -99,6 +99,8 @@ export const useLeads = (initialFilters: LeadsFilters = {}) => {
     isUpdating,
     isDeleting,
     isTakingFirstAction,
+    isTakingFirstActionById: isTakingFirstActionById,
+    isTakingFirstActionByIdArgs: originalArgs,
     
     // Error
     error,

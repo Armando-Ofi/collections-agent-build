@@ -341,7 +341,7 @@ const Contacts = () => {
                   {leadContacts.map((contact) => (
                     <div
                       key={contact.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 dark:border-white/10 border-gray-200/50"
+                      className="flex items-center justify-between p-3 rounded-lg bg-white/5 border dark:border-white/10 border-gray-200/50"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8">

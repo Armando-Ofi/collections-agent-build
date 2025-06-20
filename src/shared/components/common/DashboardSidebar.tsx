@@ -64,7 +64,7 @@ const DashboardSidebar = () => {
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="w-10 h-10 rounded-xl cyber-gradient flex items-center justify-center">
-                <Bot className="w-5 h-5 text-white" />
+                <img src="//live.staticflickr.com/65535/54600345148_1b45b347d3_n.jpg" className="w-5 h-5 text-white" />
               </div>
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background animate-pulse" />
             </div>

@@ -24,7 +24,7 @@ import {
   Edit,
   Trash2,
   MessageSquare,
-  Bot,
+  Phone,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
@@ -202,8 +202,8 @@ const DataTable = ({
                             onClick={() => onTakeFirstAction(row.id)}
                             className="flex items-center gap-2 text-primary hover:text-red-400"
                           >
-                            <Bot className="w-4 h-4" />
-                            1st Action
+                            <Phone className="w-4 h-4" />
+                            Add Call Log
                           </DropdownMenuItem>
                         )}
                         {onSuggestions && (

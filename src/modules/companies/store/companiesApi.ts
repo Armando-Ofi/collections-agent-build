@@ -5,7 +5,7 @@ import type { Company, CompanyFormData, CompanyKPIs } from '../types';
 // Definir las URLs de endpoints como constantes
 const ENDPOINTS = {
   COMPANIES: '/company/',
-  WEBHOOK_URL: 'https://n8n.sofiatechnology.ai/webhook/5c486541-e9b9-41d2-b6cf-054efbf324a4',
+  WEBHOOK_URL: 'https://n8n.sofiatechnology.ai/webhook/8fb550a1-259d-40a7-8780-3c4947158572',
   COMPANY_BY_ID: (id: string) => `/company/${id}`,
   COMPANIES_STATS: '/companies/stats',
   COMPANIES_EXPORT: '/companies/export',

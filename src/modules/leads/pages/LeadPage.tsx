@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';;
-import { useChatbotContext } from '@/shared/components/common/ChatbotProvider';
+import DynamicFormDialog from '../components/DynamicFormDialog'
 import { LeadsTable } from '@/modules/leads/components/LeadsTable'
 import LeadDetailsDialog from '@/modules/leads/components/LeadDetails' // Adjust path as needed
 import { useLeads } from '@/modules/leads/hooks/useLeads';
@@ -21,7 +21,9 @@ const LeadsPage: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
-  
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [selectedLeadForDialog, setSelectedLeadForDialog] = useState<string | null>(null);
+
   // Add state for the selected lead for AI chatbot
   const [selectedLeadForAI, setSelectedLeadForAI] = useState<Lead | null>(null);
 
@@ -29,13 +31,15 @@ const LeadsPage: React.FC = () => {
   const {
     leads,
     isLoading,
-    updateLead,
+    //updateLead,
     deleteLead,
     takeFirstAction,
-    takeFirstActionById,
+    //takeFirstActionById,
     error,
     refetch,
-    isTakingFirstAction
+    isTakingFirstAction,
+    isTakingFirstActionById,
+    isTakingFirstActionByIdArgs
   } = useLeads();
 
   // Stats query
@@ -49,9 +53,11 @@ const LeadsPage: React.FC = () => {
       }
       };*/
 
-  const handleOpenChatbot = (leadId: string) => {
+  /*const handleOpenChatbot = (leadId: string) => {
     // This function seems unused, but keeping it for consistency
-  };
+  };*/
+
+  
 
   const handleView = (id: string) => {
     const lead = leads.find(l => l.id === id);
@@ -73,8 +79,8 @@ const LeadsPage: React.FC = () => {
 
   const handleSuggestions = (lead: Lead) => {
     // Set both the lead for AI and open the chatbot
-    setSelectedLeadForAI(lead);
-    setIsChatbotOpen(true);
+    setSelectedLeadForAI(lead);   // ✅ Seleccionar lead para AI
+    setIsChatbotOpen(true);       // ✅ Abrir el chatbot
   };
 
   const handleFirstAction = async () => {
@@ -82,13 +88,14 @@ const LeadsPage: React.FC = () => {
   };
 
   const handleFirstActionById = async (id: string) => {
-    await takeFirstActionById(id);
+    setIsFormDialogOpen(true);
+    setSelectedLeadForDialog(id)
   };
 
   // Helper function to format lead context for AI chatbot
   const getLeadContextForAI = (lead: Lead) => {
     if (!lead) return undefined;
-    
+
     return {
       name: lead.name || lead.company || 'Unknown',
       industry: lead.industry || 'Unknown',
@@ -197,6 +204,8 @@ const LeadsPage: React.FC = () => {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onSuggestions={handleSuggestions}
+        isTakingFirstActionById={isTakingFirstActionById}
+        isTakingFirstActionByIdArgs={isTakingFirstActionByIdArgs}
       />
 
       {/* Lead Details Modal */}
@@ -215,6 +224,13 @@ const LeadsPage: React.FC = () => {
         }}
         leadId={selectedLeadForAI?.id || ''}
         leadContext={getLeadContextForAI(selectedLeadForAI)}
+                
+      />
+
+      <DynamicFormDialog
+        leadId={selectedLeadForDialog}
+        isOpen={isFormDialogOpen}
+        onOpenChange={setIsFormDialogOpen}
       />
     </div>
   );

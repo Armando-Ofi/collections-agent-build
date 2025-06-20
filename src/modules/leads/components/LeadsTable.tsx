@@ -17,6 +17,8 @@ import {
 interface LeadsTableProps {
   leads: Lead[];
   isLoading?: boolean;
+  isTakingFirstActionById: boolean;
+  isTakingFirstActionByIdArgs: string;
   onView: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
@@ -42,7 +44,9 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
   onEdit,
   onDelete,
   onSuggestions,
-  onFirstAction
+  onFirstAction,
+  isTakingFirstActionById,
+  isTakingFirstActionByIdArgs
 }) => {
   const columns = [
     {
@@ -120,10 +124,10 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
               <div
                 className={cn(
                   'h-full rounded-full transition-all',
-                  value >= 12 ? 'bg-green-500' :
-                    value >= 8 ? 'bg-yellow-500' : 'bg-red-500'
+                  value >= 80 ? 'bg-green-500' :
+                    value >= 50 ? 'bg-yellow-500' : 'bg-red-500'
                 )}
-                style={{ width: `${(value / 15) * 100}%` }}
+                style={{ width: `${value}%` }}
               />
             </div>
             <span className="text-sm font-medium">{value}</span>
@@ -145,8 +149,11 @@ export const LeadsTable: React.FC<LeadsTableProps> = ({
       key: 'status',
       label: 'Status',
       sortable: true,
-      render: (value: Lead['status']) => (
-        <Badge className={cn('border', LeadsService.getStatusColor(value))}>
+      render: (value: Lead['status'], record: Lead) => (
+        <Badge
+          className={cn('border', LeadsService.getStatusColor(value))}
+          isLoading={isTakingFirstActionById && (isTakingFirstActionByIdArgs === record.id)} // Comparar con el ID específico
+        >
           {value}
         </Badge>
       ),
