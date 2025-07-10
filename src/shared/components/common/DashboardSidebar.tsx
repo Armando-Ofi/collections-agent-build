@@ -17,6 +17,7 @@ import {
   Bot,
   Zap,
   TrendingUp,
+  BotIcon,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import ThemeToggle from "./ThemeToggle";
@@ -29,29 +30,11 @@ const navigation = [
     description: "Dashboard & Analytics",
   },
   {
-    title: "Leads",
-    url: "/leads",
+    title: "Payment Risk",
+    url: "/payment-risk",
     icon: Users,
-    description: "Potential Clients",
-  },
-  {
-    title: "Products",
-    url: "/products",
-    icon: Package,
-    description: "AI Agents & Services",
-  },
-  {
-    title: "Companies",
-    url: "/companies",
-    icon: Building,
-    description: "Company Database",
-  },
-  {
-    title: "Contacts",
-    url: "/contacts",
-    icon: Contact,
-    description: "Lead Contacts",
-  },
+    description: "Clients Payment Risks",
+  }
 ];
 
 const DashboardSidebar = () => {
@@ -64,12 +47,12 @@ const DashboardSidebar = () => {
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="w-10 h-10 rounded-xl cyber-gradient flex items-center justify-center">
-                <img src="//live.staticflickr.com/65535/54600345148_1b45b347d3_n.jpg" className="w-5 h-5 text-white" />
+                <BotIcon className="w-5 h-5 text-white" />
               </div>
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background animate-pulse" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">Argo Mini</h1>
+              <h1 className="text-lg font-bold text-foreground">Colin</h1>
               <p className="text-sm text-muted-foreground">Agent Dashboard</p>
             </div>
           </div>

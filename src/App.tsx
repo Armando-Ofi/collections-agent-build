@@ -20,6 +20,7 @@ const App = () => (
         <Provider store={store}>
           <BrowserRouter>
             <Routes>
+              {/*<Route path="/*" element={<Dashboard />} />*/}
               <Route path="/*" element={<Dashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -8,6 +8,7 @@ import NotFound from "@/shared/components/common/NotFound";
 import LeadsPage from "./leads/pages/LeadPage";
 import ProductsPage from "./products/pages/ProductsPage";
 import CompaniesPage from "./companies/pages/CompaniesPage";
+import PrePaymentRiskPage from "./payment-risk/pages/PrePaymentRiskPage";
 
 const Dashboard = () => {
   return (
@@ -22,6 +23,7 @@ const Dashboard = () => {
             <Route path="/leads" element={<LeadsPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/companies" element={<CompaniesPage />} />
+            <Route path="/payment-risk" element={<PrePaymentRiskPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
