@@ -83,13 +83,13 @@ export class ProductsService {
     topIndustries: Array<{ industry: string; count: number }>;
   } {
     const uniqueDevelopers = new Set(products.map(p => p.developer)).size;
-    
+
     // Get all industries
     const allIndustries = products.flatMap(p => this.parseIndustries(p.target_industries));
     const uniqueIndustries = new Set(allIndustries).size;
-    
+
     // Calculate average features per product
-    const totalFeatures = products.reduce((sum, p) => 
+    const totalFeatures = products.reduce((sum, p) =>
       sum + this.parseKeyFeatures(p.key_features).length, 0
     );
     const avgFeaturesPerProduct = products.length > 0 ? totalFeatures / products.length : 0;
@@ -111,7 +111,7 @@ export class ProductsService {
       }
       acc[industry].count++;
       // Find products that target this industry
-      const productsForIndustry = products.filter(p => 
+      const productsForIndustry = products.filter(p =>
         this.parseIndustries(p.target_industries).includes(industry)
       );
       acc[industry].products = productsForIndustry;
@@ -226,7 +226,7 @@ export class ProductsService {
   // Filter products by developer
   static filterByDeveloper(products: DBProduct[], developer: string): DBProduct[] {
     if (!developer) return products;
-    return products.filter(product => 
+    return products.filter(product =>
       product.developer.toLowerCase().includes(developer.toLowerCase())
     );
   }
@@ -262,7 +262,7 @@ export class ProductsService {
 
   // Get products by multiple criteria
   static getFilteredProducts(
-    products: DBProduct[], 
+    products: DBProduct[],
     filters: {
       search?: string;
       developer?: string;
@@ -312,4 +312,5 @@ export class ProductsService {
   static exportToJSON(products: DBProduct[]): string {
     return JSON.stringify(products, null, 2);
   }
+
 }

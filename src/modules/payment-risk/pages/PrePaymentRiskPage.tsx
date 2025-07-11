@@ -125,7 +125,7 @@ const PrePaymentRiskPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-foreground">
-                    {PrePaymentRiskService.formatAmount(stats.totalAmount)}
+                    {PrePaymentRiskService.formatMoneyCompact(stats.totalAmount)}
                   </div>
                   <p className="text-xs text-muted-foreground">Current value</p>
                 </CardContent>
@@ -139,7 +139,7 @@ const PrePaymentRiskPage: React.FC = () => {
                   <TrendingUp className="w-4 h-4 text-orange-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{stats.averageRiskScore}%</div>
+                  <div className="text-2xl font-bold text-foreground">{PrePaymentRiskService.formatPercentage(stats.averageRiskScore)}</div>
                   <p className="text-xs text-muted-foreground">Active risk level</p>
                 </CardContent>
               </Card>
@@ -193,7 +193,7 @@ const PrePaymentRiskPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-red-600">
-                    {PrePaymentRiskService.formatAmount(stats.overdueAmount)}
+                    {PrePaymentRiskService.formatMoneyCompact(stats.overdueAmount)}
                   </div>
                   <p className="text-xs text-muted-foreground">Outstanding overdue</p>
                 </CardContent>
@@ -207,7 +207,7 @@ const PrePaymentRiskPage: React.FC = () => {
                   <TrendingUp className="w-4 h-4 text-red-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{stats.overdueAvgRisk}%</div>
+                  <div className="text-2xl font-bold text-red-600">{PrePaymentRiskService.formatPercentage(stats.overdueAvgRisk)}</div>
                   <p className="text-xs text-muted-foreground">Overdue risk level</p>
                 </CardContent>
               </Card>

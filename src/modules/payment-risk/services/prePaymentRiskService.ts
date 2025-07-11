@@ -339,4 +339,23 @@ export class PrePaymentRiskService {
       actionRequired: false
     };
   }
+
+  static formatMoneyCompact(value: number): string {
+    if (isNaN(value)) return '$0';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      compactDisplay: 'short',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    }).format(value);
+
+  }
+
+  static formatPercentage(decimal: number): string {
+    if (isNaN(decimal)) return '0.00%';
+    return `${(decimal * 100).toFixed(2)}%`;
+  }
+
 }
