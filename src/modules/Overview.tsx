@@ -111,10 +111,10 @@ const Overview = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Sales AI Dashboard
+            Collections AI Dashboard
           </h1>
           <p className="text-muted-foreground">
-            Real-time insights and performance metrics for your AI sales agents
+            Real-time insights and performance metrics for your AI collections agents
           </p>
         </div>
         <div className="flex items-center gap-2">

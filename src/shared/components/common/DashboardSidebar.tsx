@@ -52,7 +52,7 @@ const DashboardSidebar = () => {
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background animate-pulse" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground">Colin</h1>
+              <h1 className="text-lg font-bold text-foreground">Sarah</h1>
               <p className="text-sm text-muted-foreground">Agent Dashboard</p>
             </div>
           </div>
