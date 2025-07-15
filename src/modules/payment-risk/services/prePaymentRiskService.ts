@@ -20,10 +20,10 @@ export class PrePaymentRiskService {
 
   // Get progress bar color
   static getRiskProgressColor(score: number): string {
-    const scorePercent = score * 100;
+    const scorePercent = score;
+    if (scorePercent >= 40) return 'bg-yellow-500';
+    if (scorePercent >= 60) return 'bg-orange-500';
     if (scorePercent >= 80) return 'bg-red-500';
-    if (scorePercent >= 60) return 'bg-yellow-500';
-    if (scorePercent >= 40) return 'bg-orange-500';
     return 'bg-green-500';
   }
 

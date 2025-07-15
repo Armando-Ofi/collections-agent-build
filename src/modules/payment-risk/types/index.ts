@@ -12,6 +12,19 @@ export interface PrePaymentRiskAnalysis {
   last_risk_level: string; // "Low", "Medium", "High", etc.
 }
 
+export interface ActivityLog {
+  id: number;
+  action_type: string;
+  contact_method: string;
+  customer_id: number;
+  invoice_id: number;
+  payment_plan_id: string | null;
+  summary: string | null;
+  response_recieved: boolean | null;
+  created_by: string | null;
+  created_at: string;
+}
+
 export interface InvoiceOverview {
   id: number;
   internal_id: string;

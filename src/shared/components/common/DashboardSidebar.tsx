@@ -11,10 +11,6 @@ import {
 import {
   BarChart3,
   Users,
-  Package,
-  Contact,
-  Building,
-  Bot,
   Zap,
   TrendingUp,
   BotIcon,

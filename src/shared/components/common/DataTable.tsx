@@ -25,8 +25,14 @@ import {
   Trash2,
   MessageSquare,
   Phone,
+  ListCollapse,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface Column {
   key: string;
@@ -39,6 +45,7 @@ interface DataTableProps {
   data: any[];
   columns: Column[];
   onView?: (id: string) => void;
+  onViewActionLogs?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onSuggestions?: (row: any) => void;
@@ -46,12 +53,14 @@ interface DataTableProps {
   searchPlaceholder?: string;
   className?: string;
   loading?: boolean;
+  itemsPerPage?: number;
 }
 
 const DataTable = ({
   data,
   columns,
   onView,
+  onViewActionLogs,
   onEdit,
   onDelete,
   onSuggestions,
@@ -59,10 +68,12 @@ const DataTable = ({
   searchPlaceholder = "Search...",
   className,
   loading = false,
+  itemsPerPage = 10,
 }: DataTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handleSort = (columnKey: string) => {
     if (sortColumn === columnKey) {
@@ -71,6 +82,7 @@ const DataTable = ({
       setSortColumn(columnKey);
       setSortDirection("asc");
     }
+    setCurrentPage(1); // Reset to first page when sorting
   };
 
   const filteredData = data.filter((row) =>
@@ -100,17 +112,36 @@ const DataTable = ({
     }
   });
 
+  // Pagination calculations
+  const totalItems = sortedData.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentPageData = sortedData.slice(startIndex, endIndex);
+
+  // Pagination handlers
+  const goToFirstPage = () => setCurrentPage(1);
+  const goToLastPage = () => setCurrentPage(totalPages);
+  const goToPreviousPage = () => setCurrentPage(Math.max(1, currentPage - 1));
+  const goToNextPage = () => setCurrentPage(Math.min(totalPages, currentPage + 1));
+
+  // Reset page when search changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
   // Skeleton rows component
   const SkeletonRows = () => (
     <>
-      {Array.from({ length: 5 }).map((_, index) => (
+      {Array.from({ length: Math.min(itemsPerPage, 5) }).map((_, index) => (
         <TableRow
           key={`skeleton-${index}`}
           className="border-white/10 dark:border-white/10 hover:bg-white/5 dark:hover:bg-white/5 transition-all duration-200 dark:hover:shadow-lg"
         >
           {columns.map((column) => (
             <TableCell key={column.key} className="text-foreground">
-              <div 
+              <div
                 className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
                 style={{ width: `${Math.random() * 40 + 60}%` }}
               />
@@ -132,7 +163,7 @@ const DataTable = ({
           <Input
             placeholder={searchPlaceholder}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             className="pl-10 glass-card dark:border-white/10 border-gray-200/50"
             disabled={loading}
           />
@@ -141,116 +172,195 @@ const DataTable = ({
           {loading ? (
             <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           ) : (
-            `${sortedData.length} items`
+            `${totalItems} items`
           )}
         </Badge>
       </div>
 
       <div className="glass-card rounded-xl border border-white/10 dark:border-white/10 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-white/10 dark:border-white/10 hover:bg-white/5 dark:hover:bg-white/5">
-              {columns.map((column) => (
-                <TableHead
-                  key={column.key}
-                  className={cn(
-                    "text-muted-foreground font-medium transition-colors",
-                    column.sortable &&
+        <ScrollArea className="h-[400px]">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/10 dark:border-white/10 hover:bg-white/5 dark:hover:bg-white/5">
+                {columns.map((column) => (
+                  <TableHead
+                    key={column.key}
+                    className={cn(
+                      "text-muted-foreground font-medium transition-colors",
+                      column.sortable &&
                       !loading &&
                       "cursor-pointer hover:text-foreground dark:hover:text-primary",
-                  )}
-                  onClick={() => !loading && column.sortable && handleSort(column.key)}
-                >
-                  <div className="flex items-center gap-2">
-                    {column.label}
-                    {column.sortable && <ArrowUpDown className="w-4 h-4" />}
-                  </div>
-                </TableHead>
-              ))}
-              <TableHead className="w-[50px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <SkeletonRows />
-            ) : (
-              sortedData.map((row, index) => (
-                <TableRow
-                  key={index}
-                  className="border-white/10 dark:border-white/10 hover:bg-white/5 dark:hover:bg-white/5 transition-all duration-200 dark:hover:shadow-lg"
-                >
-                  {columns.map((column) => (
-                    <TableCell key={column.key} className="text-foreground">
-                      {column.render
-                        ? column.render(row[column.key], row)
-                        : String(row[column.key])}
-                    </TableCell>
-                  ))}
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        className="glass-card border-white/10 dark:border-white/10"
+                    )}
+                    onClick={() => !loading && column.sortable && handleSort(column.key)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {column.label}
+                      {column.sortable && <ArrowUpDown className="w-4 h-4" />}
+                    </div>
+                  </TableHead>
+                ))}
+                <TableHead className="w-[50px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <SkeletonRows />
+              ) : currentPageData.length > 0 ? (
+                currentPageData.map((row, index) => (
+                  <TableRow
+                    key={startIndex + index}
+                    className="border-white/10 dark:border-white/10 hover:bg-white/5 dark:hover:bg-white/5 transition-all duration-200 dark:hover:shadow-lg"
+                  >
+                    {columns.map((column) => (
+                      <TableCell key={column.key} className="text-foreground">
+                        {column.render
+                          ? column.render(row[column.key], row)
+                          : String(row[column.key])}
+                      </TableCell>
+                    ))}
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="glass-card border-white/10 dark:border-white/10"
                         >
-                        {onTakeFirstAction && (
-                          <DropdownMenuItem
-                            onClick={() => onTakeFirstAction(row.id)}
-                            className="flex items-center gap-2 text-primary hover:text-red-400"
-                          >
-                            <Phone className="w-4 h-4" />
-                            Add Call Log
-                          </DropdownMenuItem>
-                        )}
-                        {onSuggestions && (
-                          <DropdownMenuItem
-                            onClick={() => onSuggestions(row)}
-                            className="flex items-center gap-2 text-primary hover:text-primary"
-                          >
-                            <MessageSquare className="w-4 h-4" />
-                            AI Suggestions
-                          </DropdownMenuItem>
-                        )}
-                        {onView && (
-                          <DropdownMenuItem
-                            onClick={() => onView(row.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <Eye className="w-4 h-4" />
-                            View
-                          </DropdownMenuItem>
-                        )}
-                        {onEdit && (
-                          <DropdownMenuItem
-                            onClick={() => onEdit(row.id)}
-                            className="flex items-center gap-2"
-                          >
-                            <Edit className="w-4 h-4" />
-                            Edit
-                          </DropdownMenuItem>
-                        )}
-                        {onDelete && (
-                          <DropdownMenuItem
-                            onClick={() => onDelete(row.id)}
-                            className="flex items-center gap-2 text-red-500 hover:text-red-400"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          {onTakeFirstAction && (
+                            <DropdownMenuItem
+                              onClick={() => onTakeFirstAction(row.id)}
+                              className="flex items-center gap-2 text-primary hover:text-red-400"
+                            >
+                              <Phone className="w-4 h-4" />
+                              Add Call Log
+                            </DropdownMenuItem>
+                          )}
+                          {onSuggestions && (
+                            <DropdownMenuItem
+                              onClick={() => onSuggestions(row)}
+                              className="flex items-center gap-2 text-primary hover:text-primary"
+                            >
+                              <MessageSquare className="w-4 h-4" />
+                              AI Suggestions
+                            </DropdownMenuItem>
+                          )}
+                          {onView && (
+                            <DropdownMenuItem
+                              onClick={() => onView(row.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <Eye className="w-4 h-4" />
+                              View
+                            </DropdownMenuItem>
+                          )}
+                          {onViewActionLogs && (
+                            <DropdownMenuItem
+                              onClick={() => onViewActionLogs(row.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <ListCollapse className="w-4 h-4" />
+                              Action Logs
+                            </DropdownMenuItem>
+                          )}
+                          {onEdit && (
+                            <DropdownMenuItem
+                              onClick={() => onEdit(row.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <Edit className="w-4 h-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          )}
+                          {onDelete && (
+                            <DropdownMenuItem
+                              onClick={() => onDelete(row.id)}
+                              className="flex items-center gap-2 text-red-500 hover:text-red-400"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length + 1} className="text-center text-muted-foreground py-8">
+                    No data found
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       </div>
+
+      {/* Pagination Controls */}
+      {!loading && totalItems > 0 && (
+        <div className="flex items-center justify-between px-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>
+              Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} results
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToFirstPage}
+                disabled={currentPage === 1}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-1 text-sm">
+              <span>Page</span>
+              <span className="font-medium">{currentPage}</span>
+              <span>of</span>
+              <span className="font-medium">{totalPages}</span>
+            </div>
+            
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToLastPage}
+                disabled={currentPage === totalPages}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

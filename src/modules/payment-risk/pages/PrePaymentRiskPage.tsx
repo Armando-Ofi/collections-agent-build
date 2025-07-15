@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import {
   AlertTriangle,
   DollarSign,
@@ -22,15 +21,21 @@ import { PrePaymentRiskService } from '../services/prePaymentRiskService';
 // Components
 import { PrePaymentRiskTable } from '../components/PrePaymentRiskTable';
 import { PrePaymentRiskViewDialog } from '../components/PrePaymentRiskDialog';
+import ActivityLogsOverview from '../components/ActivityLogsOverview';
 
 // Types
 import type { PrePaymentRiskAnalysis } from '../types';
 import Error from '@/shared/components/common/Error';
 
 const PrePaymentRiskPage: React.FC = () => {
-  // ✅ Cambiar para manejar solo el ID en lugar del objeto completo
+  // ✅ Estados para el dialog de análisis de riesgo
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<number | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  
+  // ✅ Estados para el dialog de activity logs
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
+  const [isViewActivityLogsOpen, setIsViewActivityLogsOpen] = useState(false);
+  
   const [activeTab, setActiveTab] = useState("risk-analysis");
 
   const {
@@ -40,14 +45,19 @@ const PrePaymentRiskPage: React.FC = () => {
     isLoading,
     refetch,
     updatePaymentPlan,
-    findAnalysisById,
     error
   } = usePrePaymentRisk();
 
-  // ✅ Simplificar para solo manejar el ID
+  // ✅ Manejar la vista del análisis de riesgo
   const handleView = (id: number) => {
     setSelectedAnalysisId(id);
     setIsViewDialogOpen(true);
+  };
+
+  // ✅ Manejar la apertura de activity logs
+  const handleOpenActivityLogs = (invoiceId: number) => {
+    setSelectedInvoiceId(invoiceId);
+    setIsViewActivityLogsOpen(true);
   };
 
   const handleUpdatePaymentPlan = async (id: number, plan: string) => {
@@ -56,14 +66,20 @@ const PrePaymentRiskPage: React.FC = () => {
     setSelectedAnalysisId(null);
   };
 
-  // ✅ Limpiar ambos estados
+  // ✅ Cerrar dialog de análisis de riesgo
   const handleCloseDialog = () => {
     setIsViewDialogOpen(false);
     setSelectedAnalysisId(null);
   };
 
+  // ✅ Cerrar dialog de activity logs
+  const handleCloseActivityLogs = () => {
+    setIsViewActivityLogsOpen(false);
+    setSelectedInvoiceId(null);
+  };
+
   if (error) {
-    return <Error title="Error fetching Info" onRetry={refetch}  />
+    return <Error title="Error fetching Info" onRetry={refetch} />
   }
 
   return (
@@ -154,13 +170,12 @@ const PrePaymentRiskPage: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[400px]">
-                  <PrePaymentRiskTable 
-                    data={riskAnalyses} 
-                    onView={handleView}
-                    isLoading={isLoading}
-                  />
-                </ScrollArea>
+                <PrePaymentRiskTable
+                  data={riskAnalyses}
+                  onView={handleView}
+                  onActionLogs={handleOpenActivityLogs}
+                  isLoading={isLoading}
+                />
               </CardContent>
             </Card>
           </div>
@@ -235,24 +250,30 @@ const PrePaymentRiskPage: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-[400px]">
-                  <PrePaymentRiskTable 
-                    data={overdueAccounts} 
-                    onView={handleView}
-                    isLoading={isLoading}
-                  />
-                </ScrollArea>
+                <PrePaymentRiskTable
+                  data={overdueAccounts}
+                  onView={handleView}
+                  onActionLogs={handleOpenActivityLogs}
+                  isLoading={isLoading}
+                />
               </CardContent>
             </Card>
           </div>
         </TabsContent>
       </Tabs>
 
-      {/* ✅ View Dialog - Ahora usa el ID directamente */}
+      {/* ✅ Risk Analysis Dialog */}
       <PrePaymentRiskViewDialog
         analysisId={selectedAnalysisId}
         isOpen={isViewDialogOpen}
         onClose={handleCloseDialog}
+      />
+
+      {/* ✅ Activity Logs Dialog */}
+      <ActivityLogsOverview
+        invoiceId={selectedInvoiceId}
+        isOpen={isViewActivityLogsOpen}
+        onClose={handleCloseActivityLogs}
       />
     </div>
   );

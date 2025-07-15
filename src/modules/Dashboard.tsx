@@ -3,11 +3,8 @@ import { SidebarProvider } from "@/shared/components/ui/sidebar";
 import DashboardSidebar from "@/shared/components/common/DashboardSidebar";
 import FloatingAIButton from "@/shared/components/common/FloatingAIButton";
 import Overview from "./Overview";
-import Contacts from "./Contacts";
 import NotFound from "@/shared/components/common/NotFound";
 import LeadsPage from "./leads/pages/LeadPage";
-import ProductsPage from "./products/pages/ProductsPage";
-import CompaniesPage from "./companies/pages/CompaniesPage";
 import PrePaymentRiskPage from "./payment-risk/pages/PrePaymentRiskPage";
 
 const Dashboard = () => {
@@ -19,10 +16,7 @@ const Dashboard = () => {
           <Routes>
             <Route path="/" element={<Overview />} />
             <Route path="/overview" element={<Overview />} />
-            <Route path="/contacts" element={<Contacts />} />
             <Route path="/leads" element={<LeadsPage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/companies" element={<CompaniesPage />} />
             <Route path="/payment-risk" element={<PrePaymentRiskPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

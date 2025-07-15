@@ -1,27 +1,29 @@
 import React from 'react';
-import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Calendar, AlertCircle } from "lucide-react";
 import { cn } from '@/shared/lib/utils';
+import DataTable from "@/shared/components/common/DataTable";
 import type { PrePaymentRiskAnalysis } from '../types';
 import { PrePaymentRiskService } from '../services/prePaymentRiskService';
 
 interface PrePaymentRiskTableProps {
   data: PrePaymentRiskAnalysis[];
   onView: (id: number) => void;
+  onActionLogs: (id: number) => void;
   isLoading?: boolean;
 }
 
 export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
   data,
   onView,
+  onActionLogs,
   isLoading = false
 }) => {
   const columns = [
     {
       key: "internal_id",
       label: "Invoice",
-      sortable: true,
+      sortable: false,
       render: (value: string, row: PrePaymentRiskAnalysis) => (
         <div className="flex items-center gap-3">
           <div>
@@ -111,60 +113,23 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
     },
   ];
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const handleView = (id: string) => {
+    onView(Number(id));
+  };
 
-  if (data.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">No risk analyses found</p>
-      </div>
-    );
+  const handleViewActionLogs = (id: string) => {
+    onActionLogs(Number(id));
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-border">
-            {columns.map((column) => (
-              <th key={column.key} className="text-left p-3 font-medium text-muted-foreground">
-                {column.label}
-              </th>
-            ))}
-            <th className="text-right p-3 font-medium text-muted-foreground">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row) => (
-            <tr key={row.id} className="border-b border-border hover:bg-muted/50">
-              {columns.map((column) => (
-                <td key={column.key} className="p-3">
-                  {column.render 
-                    ? column.render(row[column.key as keyof PrePaymentRiskAnalysis] as any, row)
-                    : String(row[column.key as keyof PrePaymentRiskAnalysis])
-                  }
-                </td>
-              ))}
-              <td className="p-3 text-right">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onView(row.id)}
-                  className="glass-card hover-lift"
-                >
-                  View Details
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      data={data}
+      columns={columns}
+      onView={handleView}
+      onViewActionLogs={handleViewActionLogs}
+      searchPlaceholder="Search invoices..."
+      loading={isLoading}
+      
+    />
   );
 };
