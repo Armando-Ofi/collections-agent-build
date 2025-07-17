@@ -80,13 +80,13 @@ const kpiData = [
   },
 ];
 
-const salesData = [
-  { month: "Jan", sales: 45000, leads: 234, conversion: 23.5 },
-  { month: "Feb", sales: 52000, leads: 267, conversion: 24.1 },
-  { month: "Mar", sales: 48000, leads: 289, conversion: 22.8 },
-  { month: "Apr", sales: 61000, leads: 312, conversion: 26.3 },
-  { month: "May", sales: 55000, leads: 298, conversion: 25.1 },
-  { month: "Jun", sales: 67000, leads: 334, conversion: 28.2 },
+const total_accounts_receivable = [
+  { month: "Jan", amount: 45000, },
+  { month: "Feb", amount: 52000, },
+  { month: "Mar", amount: 48000, },
+  { month: "Apr", amount: 61000, },
+  { month: "May", amount: 55000, },
+  { month: "Jun", amount: 67000, },
 ];
 
 const leadSourceData = [
@@ -158,7 +158,7 @@ const Overview = () => {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={salesData}>
+                  <AreaChart data={total_accounts_receivable}>
                     <defs>
                       <linearGradient
                         id="salesGradient"
@@ -211,7 +211,7 @@ const Overview = () => {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={salesData}>
+                  <LineChart data={total_accounts_receivable}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="month" stroke="#9CA3AF" />
                     <YAxis stroke="#9CA3AF" />
@@ -297,7 +297,7 @@ const Overview = () => {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={salesData}>
+                  <BarChart data={total_accounts_receivable}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="month" stroke="#9CA3AF" />
                     <YAxis stroke="#9CA3AF" />

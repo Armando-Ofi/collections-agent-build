@@ -28,9 +28,9 @@ const API_CONFIG = {
   BASE_URL: 'https://collection-agent.api.sofiatechnology.ai',
   ENDPOINTS: {
     ANALYSIS: (id: number) => `/invoices/${id}?customer=yes`,
-    PAYMENT_PLANS: (id: number) => `https://hook.eu2.make.com/srpkuog0surui3atditwgnoulgmep2xd?id=${id}`,
-    OFFER_EMAIL: () => `https://hook.eu2.make.com/757xdf0qm98gsh7tkyew50ysyyu23c8e`,
-    OFFER_CALL: () => `https://hook.eu2.make.com/sa7kqtfevvxu8d6q3pmj72zadddn9io5`,
+    PAYMENT_PLANS: (id: number) => `https://n8n.sofiatechnology.ai/webhook/d0208321-997d-4e73-b718-848e50aeec26?id=${id}`,
+    OFFER_EMAIL: () => `https://n8n.sofiatechnology.ai/webhook/a0356918-f334-4370-8f1d-01aab8f42b4f`,
+    OFFER_CALL: () => `https://n8n.sofiatechnology.ai/webhook/58e42a53-c8b4-4813-9ebd-72eb35cd23e7`,
   }
 };
 

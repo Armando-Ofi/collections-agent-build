@@ -117,7 +117,7 @@ const NotFound = ({
               <Button
                 onClick={handleGoBack}
                 variant="outline"
-                className="glass-card border-white/20 hover:bg-white/10 dark:hover:bg-white/10 hover:bg-gray-100/50"
+                className="glass-card border-white/20 hover:bg-white/10 dark:hover:bg-white/10"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Go Back

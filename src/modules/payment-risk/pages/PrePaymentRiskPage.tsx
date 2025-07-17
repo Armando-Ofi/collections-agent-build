@@ -191,10 +191,10 @@ const PrePaymentRiskPage: React.FC = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Overdue Count
                   </CardTitle>
-                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <AlertCircle className="w-4 h-4 text-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{stats.overdueCount}</div>
+                  <div className="text-2xl font-bold text-foreground">{stats.overdueCount}</div>
                   <p className="text-xs text-muted-foreground">Past due invoices</p>
                 </CardContent>
               </Card>
@@ -204,10 +204,10 @@ const PrePaymentRiskPage: React.FC = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Overdue Value
                   </CardTitle>
-                  <DollarSign className="w-4 h-4 text-red-500" />
+                  <DollarSign className="w-4 h-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">
+                  <div className="text-2xl font-bold text-red-destructive">
                     {PrePaymentRiskService.formatMoneyCompact(stats.overdueAmount)}
                   </div>
                   <p className="text-xs text-muted-foreground">Outstanding overdue</p>
@@ -219,10 +219,10 @@ const PrePaymentRiskPage: React.FC = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Avg Risk Score
                   </CardTitle>
-                  <TrendingUp className="w-4 h-4 text-red-500" />
+                  <TrendingUp className="w-4 h-4 text-orange-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{PrePaymentRiskService.formatPercentage(stats.overdueAvgRisk)}</div>
+                  <div className="text-2xl font-bold text-foreground">{PrePaymentRiskService.formatPercentage(stats.overdueAvgRisk)}</div>
                   <p className="text-xs text-muted-foreground">Overdue risk level</p>
                 </CardContent>
               </Card>
@@ -235,7 +235,7 @@ const PrePaymentRiskPage: React.FC = () => {
                   <AlertTriangle className="w-4 h-4 text-red-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{stats.criticalOverdue}</div>
+                  <div className="text-2xl font-bold text-foregroun">{stats.criticalOverdue}</div>
                   <p className="text-xs text-muted-foreground">Need urgent action</p>
                 </CardContent>
               </Card>
@@ -244,8 +244,8 @@ const PrePaymentRiskPage: React.FC = () => {
             {/* Overdue Accounts Table */}
             <Card className="glass-card border-red-500/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-600">
-                  <AlertCircle className="w-5 h-5" />
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <AlertCircle className="w-5 h-5 text-red-500" />
                   Overdue Accounts - Immediate Action Required
                 </CardTitle>
               </CardHeader>

@@ -20,6 +20,8 @@ import {
   MoreHorizontal,
   Search,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   Eye,
   Edit,
   Trash2,
@@ -131,6 +133,18 @@ const DataTable = ({
     setCurrentPage(1);
   };
 
+  // Function to get the appropriate sort icon
+  const getSortIcon = (columnKey: string) => {
+    if (sortColumn === columnKey) {
+      return sortDirection === "asc" ? (
+        <ArrowUp className="w-4 h-4 text-primary" />
+      ) : (
+        <ArrowDown className="w-4 h-4 text-primary" />
+      );
+    }
+    return <ArrowUpDown className="w-4 h-4 opacity-50" />;
+  };
+
   // Skeleton rows component
   const SkeletonRows = () => (
     <>
@@ -190,12 +204,13 @@ const DataTable = ({
                       column.sortable &&
                       !loading &&
                       "cursor-pointer hover:text-foreground dark:hover:text-primary",
+                      sortColumn === column.key && "text-foreground dark:text-primary",
                     )}
                     onClick={() => !loading && column.sortable && handleSort(column.key)}
                   >
                     <div className="flex items-center gap-2">
                       {column.label}
-                      {column.sortable && <ArrowUpDown className="w-4 h-4" />}
+                      {column.sortable && getSortIcon(column.key)}
                     </div>
                   </TableHead>
                 ))}
