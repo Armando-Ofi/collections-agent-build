@@ -26,6 +26,7 @@ import ActivityLogsOverview from '../components/ActivityLogsOverview';
 // Types
 import type { PrePaymentRiskAnalysis } from '../types';
 import Error from '@/shared/components/common/Error';
+import { useReminder } from '../hooks/useReminder';
 
 const PrePaymentRiskPage: React.FC = () => {
   // ✅ Estados para el dialog de análisis de riesgo
@@ -48,6 +49,14 @@ const PrePaymentRiskPage: React.FC = () => {
     error
   } = usePrePaymentRisk();
 
+  const {
+    isLoadingCall,
+    isLoadingEmail,
+    sendCallReminder,
+    sendEmailReminder,
+    reset: resetReminders
+  } = useReminder();
+
   // ✅ Manejar la vista del análisis de riesgo
   const handleView = (id: number) => {
     setSelectedAnalysisId(id);
@@ -64,6 +73,27 @@ const PrePaymentRiskPage: React.FC = () => {
     await updatePaymentPlan(id, plan);
     setIsViewDialogOpen(false);
     setSelectedAnalysisId(null);
+  };
+
+  const handleCallReminder = async (analysisId: number) => {
+    await sendCallReminder(analysisId, {
+      // Puedes pasar datos adicionales si es necesario
+      type: 'pre_payment_risk',
+      priority: 'high'
+    });
+    // Opcional: refrescar datos después del éxito
+    // refetch();
+  };
+
+  // ✅ Manejar recordatorio por email
+  const handleEmailReminder = async (analysisId: number) => {
+    await sendEmailReminder(analysisId, {
+      // Puedes pasar datos adicionales si es necesario
+      type: 'pre_payment_risk',
+      template: 'payment_reminder'
+    });
+    // Opcional: refrescar datos después del éxito
+    // refetch();
   };
 
   // ✅ Cerrar dialog de análisis de riesgo
@@ -172,6 +202,8 @@ const PrePaymentRiskPage: React.FC = () => {
               <CardContent>
                 <PrePaymentRiskTable
                   data={riskAnalyses}
+                  onCallReminder={handleCallReminder}
+                  onEmailReminder={handleEmailReminder}
                   onView={handleView}
                   onActionLogs={handleOpenActivityLogs}
                   isLoading={isLoading}
@@ -252,6 +284,8 @@ const PrePaymentRiskPage: React.FC = () => {
               <CardContent>
                 <PrePaymentRiskTable
                   data={overdueAccounts}
+                  onCallReminder={handleCallReminder}
+                  onEmailReminder={handleEmailReminder}
                   onView={handleView}
                   onActionLogs={handleOpenActivityLogs}
                   isLoading={isLoading}

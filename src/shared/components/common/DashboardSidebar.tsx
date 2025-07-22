@@ -14,6 +14,7 @@ import {
   Zap,
   TrendingUp,
   BotIcon,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import ThemeToggle from "./ThemeToggle";
@@ -30,6 +31,12 @@ const navigation = [
     url: "/payment-risk",
     icon: Users,
     description: "Clients Payment Risks",
+  },
+  {
+    title: "Payment Plans",
+    url: "/payment-plan",
+    icon: Wallet,
+    description: "Clients Payment Plans",
   }
 ];
 

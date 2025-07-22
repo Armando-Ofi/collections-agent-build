@@ -24,7 +24,7 @@ export const useActivityLogs = (): UseActivityLogsReturn => {
     
     try {
       const response = await axios.get(
-        `https://collection-agent.api.sofiatechnology.ai/action-log/${invoiceId}`
+        `https://collection-agent.api.sofiatechnology.ai/action-log/?invoice_id=${invoiceId}`
       );
       
       if (response.status !== 200) {

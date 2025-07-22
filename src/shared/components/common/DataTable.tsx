@@ -32,6 +32,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
@@ -52,6 +53,8 @@ interface DataTableProps {
   onDelete?: (id: string) => void;
   onSuggestions?: (row: any) => void;
   onTakeFirstAction?: (row: any) => void;
+  onRemindByEmail?: (row: any) => void;
+  onRemindByCall?: (row: any) => void;
   searchPlaceholder?: string;
   className?: string;
   loading?: boolean;
@@ -65,8 +68,8 @@ const DataTable = ({
   onViewActionLogs,
   onEdit,
   onDelete,
-  onSuggestions,
-  onTakeFirstAction,
+  onRemindByCall,
+  onRemindByEmail,
   searchPlaceholder = "Search...",
   className,
   loading = false,
@@ -244,24 +247,6 @@ const DataTable = ({
                           align="end"
                           className="glass-card border-white/10 dark:border-white/10"
                         >
-                          {onTakeFirstAction && (
-                            <DropdownMenuItem
-                              onClick={() => onTakeFirstAction(row.id)}
-                              className="flex items-center gap-2 text-primary hover:text-red-400"
-                            >
-                              <Phone className="w-4 h-4" />
-                              Add Call Log
-                            </DropdownMenuItem>
-                          )}
-                          {onSuggestions && (
-                            <DropdownMenuItem
-                              onClick={() => onSuggestions(row)}
-                              className="flex items-center gap-2 text-primary hover:text-primary"
-                            >
-                              <MessageSquare className="w-4 h-4" />
-                              AI Suggestions
-                            </DropdownMenuItem>
-                          )}
                           {onView && (
                             <DropdownMenuItem
                               onClick={() => onView(row.id)}
@@ -296,6 +281,24 @@ const DataTable = ({
                             >
                               <Trash2 className="w-4 h-4" />
                               Delete
+                            </DropdownMenuItem>
+                          )}
+                          {onRemindByEmail && (
+                            <DropdownMenuItem
+                              onClick={() => onRemindByEmail(row.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <Mail className="w-4 h-4" />
+                              Send Email Reminder
+                            </DropdownMenuItem>
+                          )}
+                          {onRemindByCall && (
+                            <DropdownMenuItem
+                              onClick={() => onRemindByCall(row.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <Phone className="w-4 h-4" />
+                              Send Call Reminder
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>

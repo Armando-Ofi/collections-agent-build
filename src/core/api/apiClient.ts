@@ -53,6 +53,6 @@ const baseQueryWithRetry = async (args: any, api: any, extraOptions: any) => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithRetry,
-  tagTypes: ['Lead', 'User', 'Product', 'Order', 'RiskAnalysis', 'Collections'], // Define todos los tag types
+  tagTypes: ['Lead', 'User', 'Product', 'Order', 'RiskAnalysis', 'Collections', 'PaymentPlan'], // Define todos los tag types
   endpoints: () => ({}), // Se extenderá en cada feature
 });

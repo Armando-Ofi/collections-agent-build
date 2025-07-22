@@ -10,6 +10,8 @@ interface PrePaymentRiskTableProps {
   data: PrePaymentRiskAnalysis[];
   onView: (id: number) => void;
   onActionLogs: (id: number) => void;
+  onEmailReminder: (id: number) => void;
+  onCallReminder: (id: number) => void;
   isLoading?: boolean;
 }
 
@@ -17,6 +19,8 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
   data,
   onView,
   onActionLogs,
+  onCallReminder,
+  onEmailReminder,
   isLoading = false
 }) => {
   const columns = [
@@ -121,12 +125,22 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
     onActionLogs(Number(id));
   }
 
+  const handleEmailReminder = (id: string) => {
+    onEmailReminder(Number(id));
+  }
+
+  const handleCallReminder = (id: string) => {
+    onCallReminder(Number(id));
+  }
+
   return (
     <DataTable
       data={data}
       columns={columns}
       onView={handleView}
       onViewActionLogs={handleViewActionLogs}
+      onRemindByCall={handleCallReminder}
+      onRemindByEmail={handleEmailReminder}
       searchPlaceholder="Search invoices..."
       loading={isLoading}
       
