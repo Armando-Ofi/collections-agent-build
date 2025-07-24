@@ -37,12 +37,12 @@ export const PaymentPlansTable: React.FC<PaymentPlansTableProps> = ({
       ),
     },
     {
-      key: "customer_id",
+      key: "customer_name",
       label: "Customer",
       sortable: true,
       render: (value: number) => (
         <div className="text-sm font-medium text-foreground">
-          Customer #{value}
+          {value}
         </div>
       ),
     },
@@ -76,9 +76,6 @@ export const PaymentPlansTable: React.FC<PaymentPlansTableProps> = ({
           <Receipt className="w-3 h-3 text-muted-foreground" />
           <div>
             <div className="text-sm font-medium text-foreground">{value} payments</div>
-            <div className="text-xs text-muted-foreground">
-              {PaymentPlanService.formatAmount(row.total_amount / value)} each
-            </div>
           </div>
         </div>
       ),

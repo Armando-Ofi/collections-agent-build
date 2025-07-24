@@ -5,6 +5,7 @@ import { cn } from '@/shared/lib/utils';
 import DataTable from "@/shared/components/common/DataTable";
 import type { PrePaymentRiskAnalysis } from '../types';
 import { PrePaymentRiskService } from '../services/prePaymentRiskService';
+import { s } from 'node_modules/framer-motion/dist/types.d-CtuPurYT';
 
 interface PrePaymentRiskTableProps {
   data: PrePaymentRiskAnalysis[];
@@ -105,6 +106,16 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
           </div>
         );
       },
+    },
+    {
+      key: "last_action",
+      label: "Last Action",
+      sortable: true,
+      render: (value: string) => (
+        <div className="text-sm text-muted-foreground">
+          {value}
+        </div>
+      ),
     },
     {
       key: "payment_terms",

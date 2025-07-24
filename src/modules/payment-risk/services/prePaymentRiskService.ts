@@ -1,4 +1,5 @@
 // services/prePaymentRiskService.ts
+import dayjs from 'dayjs';
 import { PrePaymentRiskAnalysis, PaymentPlan } from '../types';
 
 export class PrePaymentRiskService {
@@ -11,7 +12,7 @@ export class PrePaymentRiskService {
   static getRiskColor(score: number): string {
     // Score viene como decimal (0-1), lo convertimos a porcentaje
     const scorePercent = score * 100;
-    
+
     if (scorePercent >= 80) return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30";
     if (scorePercent >= 60) return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800/30";
     if (scorePercent >= 40) return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800/30";
@@ -30,7 +31,7 @@ export class PrePaymentRiskService {
   // Get risk level text
   static getRiskLevel(score: number): string {
     const scorePercent = score * 100;
-    
+
     if (scorePercent >= 80) return "High Risk";
     if (scorePercent >= 60) return "Medium-High Risk";
     if (scorePercent >= 40) return "Medium Risk";
@@ -64,18 +65,19 @@ export class PrePaymentRiskService {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'UTC'
     });
   }
 
-  // Calculate days overdue (from your current implementation)
+
   static calculateDaysOverdue(dueDateString: string): number {
-    const today = new Date();
-    const dueDate = new Date(dueDateString);
-    const timeDiff = today.getTime() - dueDate.getTime();
-    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    const today = dayjs().startOf('day');
+    const dueDate = dayjs(dueDateString).startOf('day');
+    const daysDiff = today.diff(dueDate, 'day');
     return daysDiff > 0 ? daysDiff : 0;
   }
+
 
   // Alias for compatibility with new interface
   static getDaysOverdue(dueDateString: string, currentDate: Date = new Date()): number {
@@ -87,7 +89,7 @@ export class PrePaymentRiskService {
 
   // Check if invoice is overdue
   static isOverdue(dueDateString: string, currentDate: Date = new Date()): boolean {
-    return this.getDaysOverdue(dueDateString, currentDate) > 0;
+    return this.getDaysOverdue(dueDateString, currentDate) >= 0;
   }
 
   // Truncate text utility
@@ -99,7 +101,7 @@ export class PrePaymentRiskService {
   static calculatePortfolioMetrics(analyses: PrePaymentRiskAnalysis[]) {
     const totalInvoices = analyses.length;
     const totalAmount = analyses.reduce((sum, item) => sum + item.amount, 0);
-    const averageRiskScore = analyses.length > 0 
+    const averageRiskScore = analyses.length > 0
       ? Math.round(analyses.reduce((sum, item) => sum + (item.last_risk_score * 100), 0) / analyses.length)
       : 0;
     const highRiskCount = analyses.filter(item => (item.last_risk_score * 100) >= 80).length;
@@ -116,7 +118,7 @@ export class PrePaymentRiskService {
   static calculateActiveMetrics(analyses: PrePaymentRiskAnalysis[]) {
     const activeInvoices = analyses.filter(item => item.status !== "Paid" && item.status !== "Cancelled");
     const activeAmount = activeInvoices.reduce((sum, item) => sum + item.amount, 0);
-    const activeAvgRisk = activeInvoices.length > 0 
+    const activeAvgRisk = activeInvoices.length > 0
       ? Math.round(activeInvoices.reduce((sum, item) => sum + (item.last_risk_score * 100), 0) / activeInvoices.length)
       : 0;
 
@@ -133,9 +135,9 @@ export class PrePaymentRiskService {
       const daysOverdue = this.calculateDaysOverdue(item.due_date);
       return daysOverdue > 0 && item.status !== "Paid";
     });
-    
+
     const overdueAmount = overdueInvoices.reduce((sum, item) => sum + item.amount, 0);
-    const overdueAvgRisk = overdueInvoices.length > 0 
+    const overdueAvgRisk = overdueInvoices.length > 0
       ? Math.round(overdueInvoices.reduce((sum, item) => sum + (item.last_risk_score * 100), 0) / overdueInvoices.length)
       : 0;
     const criticalOverdue = overdueInvoices.filter(item => this.calculateDaysOverdue(item.due_date) > 15).length;
@@ -158,7 +160,7 @@ export class PrePaymentRiskService {
     const scorePercent = riskScore * 100;
     const daysOverdue = this.calculateDaysOverdue(analysis.due_date);
     const { status, amount } = analysis;
-    
+
     if (scorePercent >= 80 && status !== "Paid") {
       recommendations.push({
         title: "High Risk - Immediate Action Required",
@@ -166,7 +168,7 @@ export class PrePaymentRiskService {
         priority: "high" as const
       });
     }
-    
+
     if (daysOverdue > 0 && status !== "Paid") {
       recommendations.push({
         title: "Overdue Payment",
@@ -174,7 +176,7 @@ export class PrePaymentRiskService {
         priority: "high" as const
       });
     }
-    
+
     if (scorePercent >= 60 && status === "Pending") {
       recommendations.push({
         title: "Payment Plan Option",
@@ -182,7 +184,7 @@ export class PrePaymentRiskService {
         priority: "recommended" as const
       });
     }
-    
+
     if (scorePercent < 40 && status === "Pending") {
       recommendations.push({
         title: "Early Payment Discount",
@@ -228,7 +230,7 @@ export class PrePaymentRiskService {
       "Due on Receipt": { description: "Payment due immediately", daysAllowed: 0 },
       "2/10 Net 30": { description: "2% discount if paid within 10 days, otherwise due in 30", daysAllowed: 30 },
     };
-    
+
     return termsInfo[terms] || { description: terms, daysAllowed: 30 };
   }
 
@@ -248,18 +250,18 @@ export class PrePaymentRiskService {
   // Format payment plan summary
   static formatPaymentPlanSummary(plan: PaymentPlan): string {
     const installmentAmount = this.calculateInstallmentAmount(plan);
-    
+
     if (plan.installments === 1) {
       return `Full payment: ${this.formatAmount(plan.total_amount)}`;
     }
-    
+
     return `${plan.installments} payments of ${this.formatAmount(installmentAmount)} each`;
   }
 
   // Get discount summary
   static getDiscountSummary(plan: PaymentPlan, originalAmount: number): string | null {
     if (!plan.have_discount) return null;
-    
+
     return `Save ${this.formatAmount(plan.discount_amount)} (${plan.discount_percentage}% off)`;
   }
 
@@ -275,12 +277,12 @@ export class PrePaymentRiskService {
       totalAmount: portfolioMetrics.totalAmount,
       averageRiskScore: portfolioMetrics.averageRiskScore,
       highRiskCount: portfolioMetrics.highRiskCount,
-      
+
       // Active level
       activeInvoices: activeMetrics.activeInvoices,
       activeAmount: activeMetrics.activeAmount,
       activeAvgRisk: activeMetrics.activeAvgRisk,
-      
+
       // Overdue level
       overdueCount: overdueMetrics.overdueCount,
       overdueAmount: overdueMetrics.overdueAmount,
@@ -292,7 +294,7 @@ export class PrePaymentRiskService {
   // Risk assessment utilities
   static assessRiskLevel(score: number): { level: string; color: string; severity: number } {
     const scorePercent = score * 100;
-    
+
     if (scorePercent >= 80) return { level: "High Risk", color: "red", severity: 4 };
     if (scorePercent >= 60) return { level: "Medium-High Risk", color: "yellow", severity: 3 };
     if (scorePercent >= 40) return { level: "Medium Risk", color: "orange", severity: 2 };

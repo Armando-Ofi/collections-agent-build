@@ -26,7 +26,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn } from '@/shared/lib/utils';
-import type { PrePaymentRiskAnalysis, PaymentPlan } from '../types';
+import type { PaymentPlan } from '../types';
 import { PrePaymentRiskService } from '../services/prePaymentRiskService';
 import { useDialogStates } from '../hooks/useDialogStates';
 
@@ -386,13 +386,6 @@ export const PrePaymentRiskViewDialog: React.FC<PrePaymentRiskViewDialogProps> =
                                 </div>
                               </div>
                             )}
-
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Calendar className="w-4 h-4" />
-                              <span>
-                                {PrePaymentRiskService.formatDate(plan.start_date)} - {PrePaymentRiskService.formatDate(plan.end_date)}
-                              </span>
-                            </div>
 
                             <p className="text-sm text-muted-foreground italic">
                               "{plan.message}"

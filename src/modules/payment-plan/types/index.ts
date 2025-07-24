@@ -95,3 +95,24 @@ export type PaymentInstallmentStatus =
   | 'Paid' 
   | 'Overdue' 
   | 'Cancelled';
+
+  // types/paymentPlan.ts
+
+export interface PaymentPlanDetails {
+  id: number;
+  plan_id: string;
+  invoice_id: number;
+  customer_id: number;
+  start_date: string | null;
+  end_date: string | null;
+  installments: number;
+  total_amount: number;
+  status: 'Active' | 'Denied' | 'Completed' | 'Cancelled';
+  have_discount: boolean;
+  discount_amount: number;
+  discount_percentage: number;
+  suggested_plan_message: string;
+  created_at: string;
+  updated_at: string;
+  log_entries: PaymentPlanLogEntry[];
+}

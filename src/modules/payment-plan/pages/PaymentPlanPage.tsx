@@ -13,9 +13,8 @@ import {
   AlertTriangle,
   RefreshCcw,
   Receipt,
-  Calendar,
   Percent,
-  Users,
+  CircleXIcon,
 } from "lucide-react";
 import { cn } from '@/shared/lib/utils';
 
@@ -28,9 +27,8 @@ import { PaymentPlansTable } from '../components/PaymentPlansTable';
 // import { PaymentPlanViewDialog } from '../components/PaymentPlanDialog';
 // import ActivityLogsOverview from '../components/ActivityLogsOverview';
 
-// Types
-import type { PaymentPlan } from '../types';
 import Error from '@/shared/components/common/Error';
+import { PaymentPlanDetailsDialog } from '../components/PaymentPlanDetailsDialog';
 
 const PaymentPlansPage: React.FC = () => {
   // ✅ Estados para el dialog de plan de pago
@@ -46,7 +44,7 @@ const PaymentPlansPage: React.FC = () => {
   const {
     paymentPlans,
     activePlans,
-    completedPlans,
+    deniedPlans,
     defaultedPlans,
     stats,
     isLoading,
@@ -79,11 +77,6 @@ const PaymentPlansPage: React.FC = () => {
     setSelectedPlanId(null);
   };
 
-  // ✅ Cerrar dialog de activity logs
-  const handleCloseActivityLogs = () => {
-    setIsViewActivityLogsOpen(false);
-    setSelectedInvoiceId(null);
-  };
 
   if (error) {
     return <Error title="Error fetching Payment Plans" onRetry={refetch} />
@@ -116,8 +109,8 @@ const PaymentPlansPage: React.FC = () => {
             Active Plans
           </TabsTrigger>
           <TabsTrigger value="completed-plans" className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4" />
-            Completed
+            <CircleXIcon className="w-4 h-4" />
+            Denied
           </TabsTrigger>
           <TabsTrigger value="defaulted-plans" className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4" />
@@ -268,7 +261,7 @@ const PaymentPlansPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <PaymentPlansTable
-                  data={completedPlans}
+                  data={deniedPlans}
                   onView={handleView}
                   onActionLogs={handleOpenActivityLogs}
                   isLoading={isLoading}
@@ -416,11 +409,11 @@ const PaymentPlansPage: React.FC = () => {
       </Tabs>
 
       {/* ✅ Payment Plan Dialog */}
-      {/* <PaymentPlanViewDialog
-        planId={selectedPlanId}
+      <PaymentPlanDetailsDialog
+        planId={String(selectedPlanId)}
         isOpen={isViewDialogOpen}
         onClose={handleCloseDialog}
-      /> */}
+      /> 
 
       {/* ✅ Activity Logs Dialog */}
       {/* <ActivityLogsOverview

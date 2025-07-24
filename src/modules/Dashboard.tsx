@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { SidebarProvider } from "@/shared/components/ui/sidebar";
 import DashboardSidebar from "@/shared/components/common/DashboardSidebar";
-import FloatingAIButton from "@/shared/components/common/FloatingAIButton";
+//import FloatingAIButton from "@/shared/components/common/FloatingAIButton";
 //import Overview from "./Overview";
 import NotFound from "@/shared/components/common/NotFound";
 import LeadsPage from "./leads/pages/LeadPage";
@@ -24,7 +24,7 @@ const Dashboard = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        <FloatingAIButton />
+        {/*<FloatingAIButton />*/}
       </div>
     </SidebarProvider>
   );

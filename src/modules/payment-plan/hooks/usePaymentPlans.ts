@@ -51,8 +51,8 @@ export const usePaymentPlans = (initialFilters: PaymentPlanFilters = {}) => {
     [paymentPlans]
   );
   
-  const completedPlans = useMemo(() => 
-    paymentPlans.filter(plan => plan.status === 'Completed'), 
+  const deniedPlans = useMemo(() => 
+    paymentPlans.filter(plan => plan.status === 'Denied'), 
     [paymentPlans]
   );
   
@@ -172,7 +172,7 @@ export const usePaymentPlans = (initialFilters: PaymentPlanFilters = {}) => {
     // Data
     paymentPlans,
     activePlans,
-    completedPlans,
+    deniedPlans,
     defaultedPlans,
     stats,
     
