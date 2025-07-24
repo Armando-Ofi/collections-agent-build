@@ -17,7 +17,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import ThemeToggle from "./ThemeToggle";
+import SettingsComponent from "./SettingsComponent";
 
 const navigation = [
   {
@@ -59,7 +59,7 @@ const DashboardSidebar = () => {
               <p className="text-sm text-muted-foreground">Agent Dashboard</p>
             </div>
           </div>
-          <ThemeToggle />
+          <SettingsComponent />
         </div>
       </SidebarHeader>
 
@@ -112,7 +112,7 @@ const DashboardSidebar = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-yellow-500" />
+            <Zap className="w-4 w-4 text-yellow-500" />
             <span className="text-xs text-muted-foreground">
               Auto-optimizing
             </span>

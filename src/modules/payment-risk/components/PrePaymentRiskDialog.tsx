@@ -249,7 +249,7 @@ export const PrePaymentRiskViewDialog: React.FC<PrePaymentRiskViewDialogProps> =
                           />
                         </div>
                         <p className="text-xs text-muted-foreground text-center">
-                          Risk Score: {riskAnalysis.last_risk_score}
+                          Risk Score: {PrePaymentRiskService.formatPercentage(Number(riskAnalysis.last_risk_score))}
                         </p>
                       </div>
                     </CardContent>

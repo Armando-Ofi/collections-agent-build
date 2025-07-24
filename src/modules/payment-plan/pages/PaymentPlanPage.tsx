@@ -135,7 +135,7 @@ const PaymentPlansPage: React.FC = () => {
                   <CreditCard className="w-4 h-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{stats.activePlans | 0}</div>
+                  <div className="text-2xl font-bold text-foreground">{stats.activePlans}</div>
                   <p className="text-xs text-muted-foreground">Currently active</p>
                 </CardContent>
               </Card>

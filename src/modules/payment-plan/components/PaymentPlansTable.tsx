@@ -157,7 +157,7 @@ export const PaymentPlansTable: React.FC<PaymentPlansTableProps> = ({
       data={data}
       columns={columns}
       onView={handleView}
-      onViewActionLogs={onActionLogs ? handleViewActionLogs : undefined}
+      /*onViewActionLogs={onActionLogs ? handleViewActionLogs : undefined}*/
       searchPlaceholder="Search payment plans..."
       loading={isLoading}
     />
