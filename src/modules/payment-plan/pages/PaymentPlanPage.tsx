@@ -1,7 +1,7 @@
-
 // pages/PaymentPlansPage.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom'; // Para manejar query parameters
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
@@ -29,8 +29,12 @@ import { PaymentPlansTable } from '../components/PaymentPlansTable';
 
 import Error from '@/shared/components/common/Error';
 import { PaymentPlanDetailsDialog } from '../components/PaymentPlanDetailsDialog';
+import { useReminder } from '../hooks/useReminder';
 
 const PaymentPlansPage: React.FC = () => {
+  // ✅ Usar searchParams para obtener query parameters de la URL
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   // ✅ Estados para el dialog de plan de pago
   const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -39,7 +43,15 @@ const PaymentPlansPage: React.FC = () => {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
   const [isViewActivityLogsOpen, setIsViewActivityLogsOpen] = useState(false);
   
-  const [activeTab, setActiveTab] = useState("active-plans");
+  // ✅ Configurar el tab activo desde URL o default
+  const [activeTab, setActiveTab] = useState(() => {
+    return searchParams.get('tab') || "active-plans";
+  });
+
+  // ✅ Estado para la búsqueda inicial
+  const [initialSearch, setInitialSearch] = useState(() => {
+    return searchParams.get('search') || "";
+  });
 
   const {
     paymentPlans,
@@ -52,6 +64,33 @@ const PaymentPlansPage: React.FC = () => {
     updatePaymentPlanStatus,
     error
   } = usePaymentPlans();
+
+  const {
+    sendEmailReminder
+  } = useReminder();
+
+  // ✅ Efecto para manejar cambios en URL
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const search = searchParams.get('search');
+    
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+    
+    if (search && search !== initialSearch) {
+      setInitialSearch(search);
+    }
+  }, [searchParams, activeTab, initialSearch]);
+
+  // ✅ Manejar cambio de tab y actualizar URL
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    // Actualizar URL pero mantener search si existe
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', newTab);
+    setSearchParams(newParams);
+  };
 
   // ✅ Manejar la vista del plan de pago
   const handleView = (id: number) => {
@@ -77,6 +116,15 @@ const PaymentPlansPage: React.FC = () => {
     setSelectedPlanId(null);
   };
 
+  const handleEmailReminder = async (analysisId: string) => {
+    await sendEmailReminder(analysisId, {
+      // Puedes pasar datos adicionales si es necesario
+      type: 'pre_payment_risk',
+      template: 'payment_reminder'
+    });
+    // Opcional: refrescar datos después del éxito
+    // refetch();
+  };
 
   if (error) {
     return <Error title="Error fetching Payment Plans" onRetry={refetch} />
@@ -102,7 +150,7 @@ const PaymentPlansPage: React.FC = () => {
       </div>
 
       {/* Tabs Container */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="glass-card dark:border-white/10 border-gray-200/50 w-full grid grid-cols-4">
           <TabsTrigger value="active-plans" className="flex items-center gap-2">
             <CreditCard className="w-4 h-4" />
@@ -194,8 +242,10 @@ const PaymentPlansPage: React.FC = () => {
                 <PaymentPlansTable
                   data={activePlans}
                   onView={handleView}
+                  onEmailReminder={handleEmailReminder}
                   onActionLogs={handleOpenActivityLogs}
                   isLoading={isLoading}
+                  initialSearch={activeTab === "active-plans" ? initialSearch : ""}
                 />
               </CardContent>
             </Card>
@@ -263,8 +313,10 @@ const PaymentPlansPage: React.FC = () => {
                 <PaymentPlansTable
                   data={deniedPlans}
                   onView={handleView}
+                  onEmailReminder={handleEmailReminder}
                   onActionLogs={handleOpenActivityLogs}
                   isLoading={isLoading}
+                  initialSearch={activeTab === "completed-plans" ? initialSearch : ""}
                 />
               </CardContent>
             </Card>
@@ -317,8 +369,10 @@ const PaymentPlansPage: React.FC = () => {
                 <PaymentPlansTable
                   data={defaultedPlans}
                   onView={handleView}
+                  onEmailReminder={handleEmailReminder}
                   onActionLogs={handleOpenActivityLogs}
                   isLoading={isLoading}
+                  initialSearch={activeTab === "defaulted-plans" ? initialSearch : ""}
                 />
               </CardContent>
             </Card>
@@ -399,8 +453,10 @@ const PaymentPlansPage: React.FC = () => {
                 <PaymentPlansTable
                   data={paymentPlans}
                   onView={handleView}
+                  onEmailReminder={handleEmailReminder}
                   onActionLogs={handleOpenActivityLogs}
                   isLoading={isLoading}
+                  initialSearch={activeTab === "all-plans" ? initialSearch : ""} // ✅ Pasar búsqueda inicial solo en el tab correcto
                 />
               </CardContent>
             </Card>

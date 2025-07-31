@@ -13,6 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn } from '@/shared/lib/utils';
+import { useNavigate } from 'react-router-dom'; // Asumiendo que usas React Router
 
 // Hooks and Services
 import { usePrePaymentRisk } from '../hooks/usePrePaymentRisk';
@@ -38,6 +39,9 @@ const PrePaymentRiskPage: React.FC = () => {
   const [isViewActivityLogsOpen, setIsViewActivityLogsOpen] = useState(false);
   
   const [activeTab, setActiveTab] = useState("risk-analysis");
+
+  // Hook para navegación
+  const navigate = useNavigate();
 
   const {
     riskAnalyses,
@@ -67,6 +71,12 @@ const PrePaymentRiskPage: React.FC = () => {
   const handleOpenActivityLogs = (invoiceId: number) => {
     setSelectedInvoiceId(invoiceId);
     setIsViewActivityLogsOpen(true);
+  };
+
+  // ✅ Nueva función para manejar click en status badge
+  const handleStatusClick = (paymentPlanId: string) => {
+    // Navegar a la página de Payment Plans con el tab "all-plans" y búsqueda automática
+    navigate(`/payment-plan?tab=all-plans&search=PP_${paymentPlanId}`);
   };
 
   const handleUpdatePaymentPlan = async (id: number, plan: string) => {
@@ -206,6 +216,7 @@ const PrePaymentRiskPage: React.FC = () => {
                   onEmailReminder={handleEmailReminder}
                   onView={handleView}
                   onActionLogs={handleOpenActivityLogs}
+                  onStatusClick={handleStatusClick} // ✅ Nueva prop
                   isLoading={isLoading}
                 />
               </CardContent>
@@ -288,6 +299,7 @@ const PrePaymentRiskPage: React.FC = () => {
                   onEmailReminder={handleEmailReminder}
                   onView={handleView}
                   onActionLogs={handleOpenActivityLogs}
+                  onStatusClick={handleStatusClick} // ✅ Nueva prop también aquí
                   isLoading={isLoading}
                 />
               </CardContent>

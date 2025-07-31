@@ -5,7 +5,6 @@ import { cn } from '@/shared/lib/utils';
 import DataTable from "@/shared/components/common/DataTable";
 import type { PrePaymentRiskAnalysis } from '../types';
 import { PrePaymentRiskService } from '../services/prePaymentRiskService';
-import { s } from 'node_modules/framer-motion/dist/types.d-CtuPurYT';
 
 interface PrePaymentRiskTableProps {
   data: PrePaymentRiskAnalysis[];
@@ -13,6 +12,7 @@ interface PrePaymentRiskTableProps {
   onActionLogs: (id: number) => void;
   onEmailReminder: (id: number) => void;
   onCallReminder: (id: number) => void;
+  onStatusClick?: (paymentPlanId: string) => void; // Nueva prop para manejar click en status
   isLoading?: boolean;
 }
 
@@ -22,6 +22,7 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
   onActionLogs,
   onCallReminder,
   onEmailReminder,
+  onStatusClick,
   isLoading = false
 }) => {
   const columns = [
@@ -76,14 +77,22 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
       key: "status",
       label: "Status",
       sortable: true,
-      render: (value: string) => (
-        <Badge className={cn(
-          "glass-card dark:border-white/20 border-gray-300/50",
-          PrePaymentRiskService.getStatusColor(value)
-        )}>
-          {value}
-        </Badge>
-      ),
+      render: (value: string, row: PrePaymentRiskAnalysis) => {
+        const isClickable = (value === "PP Active " || value === "PP Defaulted") && row.id && onStatusClick;
+        
+        return (
+          <Badge 
+            className={cn(
+              "glass-card dark:border-white/20 border-gray-300/50",
+              PrePaymentRiskService.getStatusColor(value),
+              isClickable && "cursor-pointer hover:opacity-80 transition-opacity"
+            )}
+            onClick={isClickable ? () => onStatusClick(String(row.id)) : undefined}
+          >
+            {value}
+          </Badge>
+        );
+      },
     },
     {
       key: "last_risk_score",
@@ -154,7 +163,6 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
       onRemindByEmail={handleEmailReminder}
       searchPlaceholder="Search invoices..."
       loading={isLoading}
-      
     />
   );
 };

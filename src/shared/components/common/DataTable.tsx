@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -59,6 +59,7 @@ interface DataTableProps {
   className?: string;
   loading?: boolean;
   itemsPerPage?: number;
+  initialSearch?: string;
 }
 
 const DataTable = ({
@@ -74,11 +75,18 @@ const DataTable = ({
   className,
   loading = false,
   itemsPerPage = 10,
+  initialSearch = ""
 }: DataTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    if (initialSearch && initialSearch !== searchTerm) {
+      setSearchTerm(initialSearch);
+    }
+  }, [initialSearch]);
 
   const handleSort = (columnKey: string) => {
     if (sortColumn === columnKey) {

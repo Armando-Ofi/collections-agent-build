@@ -13,14 +13,18 @@ interface PaymentPlansTableProps {
   data: PaymentPlan[];
   onView: (id: number) => void;
   onActionLogs?: (id: number) => void;
+  onEmailReminder: (id: string) => void;
   isLoading?: boolean;
+  initialSearch?: string; 
 }
 
 export const PaymentPlansTable: React.FC<PaymentPlansTableProps> = ({
   data,
   onView,
   onActionLogs,
-  isLoading = false
+  onEmailReminder,
+  isLoading = false,
+  initialSearch = ""
 }) => {
   const columns = [
     {
@@ -142,6 +146,10 @@ export const PaymentPlansTable: React.FC<PaymentPlansTableProps> = ({
     },
   ];
 
+  const handleEmailReminder = (id: string) => {
+    onEmailReminder(id);
+  }
+
   const handleView = (id: string) => {
     onView(Number(id));
   };
@@ -159,7 +167,9 @@ export const PaymentPlansTable: React.FC<PaymentPlansTableProps> = ({
       onView={handleView}
       /*onViewActionLogs={onActionLogs ? handleViewActionLogs : undefined}*/
       searchPlaceholder="Search payment plans..."
+      onRemindByEmail={handleEmailReminder}
       loading={isLoading}
+      initialSearch={initialSearch}
     />
   );
 };

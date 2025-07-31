@@ -60,7 +60,7 @@ const KPICard = ({
           className={cn("text-xs font-medium", getTrendColor())}
         >
           {getTrendIcon()}
-          {Math.abs(change)}%
+          {Math.round(Number(change))}%
         </Badge>
       </CardHeader>
       <CardContent>
