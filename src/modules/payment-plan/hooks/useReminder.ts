@@ -87,7 +87,7 @@ const ReminderService = {
   },
 
   sendEmailReminder: async (id: string | number, data?: any): Promise<ReminderResponse> => {
-    const url = `https://n8n.sofiatechnology.ai/webhook/b9730cce-c66d-4040-9f97-282c24c063b1?pp_id=PP_${id}`;
+    const url = `https://n8n.sofiatechnology.ai/webhook/b9730cce-c66d-4040-9f97-282c24c063b1?id=${id}`;
     
     try {
       const response = await fetch(url, {

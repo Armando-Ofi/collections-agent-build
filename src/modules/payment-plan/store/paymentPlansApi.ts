@@ -1,4 +1,3 @@
-
 // store/paymentPlansApi.ts
 
 import { baseApi } from "@/core/api/apiClient";
@@ -13,7 +12,7 @@ import type {
 const ENDPOINTS = {
   PAYMENT_PLANS: '/payment-plans/',
   PAYMENT_PLAN_BY_ID: (id: number) => `/payment-plans/${id}/`,
-  PAYMENT_PLAN_STATS: '/invoices-kpi/',
+  PAYMENT_PLAN_STATS: '/kpi/payment-plans/',
   PAYMENT_PLAN_ANALYTICS: '/payment-plans/analytics/',
   PAYMENT_PLAN_EXPORT: '/payment-plans/export/',
   UPDATE_PLAN_STATUS: (id: number) => `/payment-plans/${id}/status/`,
@@ -38,43 +37,51 @@ interface PaginatedResponse<T> {
   hasPrev: boolean;
 }
 
-// Función para calcular estadísticas localmente si no hay endpoint de stats
+// ✅ Función actualizada con nueva estructura de stats
 function calculatePaymentPlanStats(plans: PaymentPlan[]): PaymentPlanStats {
   const totalPlans = plans.length;
   const totalAmount = plans.reduce((sum, plan) => sum + plan.total_amount, 0);
   
-  const activePlans = plans.filter(p => p.status === 'Active').length;
-  const activeAmount = plans.filter(p => p.status === 'Active')
-    .reduce((sum, plan) => sum + plan.total_amount, 0);
+  const activePlans = plans.filter(p => p.status === 'Active');
+  const activeAmount = activePlans.reduce((sum, plan) => sum + plan.total_amount, 0);
   
-  const completedPlans = plans.filter(p => p.status === 'Completed').length;
-  const completedAmount = plans.filter(p => p.status === 'Completed')
-    .reduce((sum, plan) => sum + plan.total_amount, 0);
+  const deniedPlans = plans.filter(p => p.status === 'Denied');
   
-  const defaultedPlans = plans.filter(p => p.status === 'Defaulted').length;
-  const defaultedAmount = plans.filter(p => p.status === 'Defaulted')
-    .reduce((sum, plan) => sum + plan.total_amount, 0);
+  const defaultedPlans = plans.filter(p => p.status === 'Defaulted');
+  const defaultedAmount = defaultedPlans.reduce((sum, plan) => sum + plan.total_amount, 0);
+  
+  const completedPlans = plans.filter(p => p.status === 'Completed');
   
   const averageInstallments = totalPlans > 0 
-    ? plans.reduce((sum, plan) => sum + plan.installments, 0) / totalPlans 
+    ? Math.round(plans.reduce((sum, plan) => sum + plan.installments, 0) / totalPlans)
     : 0;
   
   const totalDiscountAmount = plans.reduce((sum, plan) => sum + plan.discount_amount, 0);
   
-  const successRate = totalPlans > 0 ? (completedPlans / totalPlans) * 100 : 0;
+  const successRate = totalPlans > 0 ? completedPlans.length / totalPlans : 0;
 
+  // ✅ Devolver la nueva estructura anidada
   return {
-    totalPlans,
-    totalAmount,
-    activeAmount,
-    activePlans,
-    completedPlans,
-    completedAmount,
-    defaultedPlans,
-    defaultedAmount,
-    averageInstallments,
-    totalDiscountAmount,
-    successRate,
+    active_plans: {
+      total_active_plans: activePlans.length,
+      active_amount: activeAmount,
+      avg_installments: averageInstallments,
+      success_rate: successRate,
+    },
+    denied_plans: {
+      total_denied_plans: deniedPlans.length,
+      avg_denied_plans: 0, // Puedes calcular esto según tu lógica de negocio
+    },
+    defaulted_plans: {
+      total_defaulted_plans: defaultedPlans.length,
+      defaulted_amount: defaultedAmount,
+    },
+    total_plans: {
+      total_plans: totalPlans,
+      total_amount: totalAmount,
+      success_rate: successRate,
+      total_discounts: totalDiscountAmount,
+    },
   };
 }
 
@@ -318,7 +325,7 @@ export const PaymentPlanService = {
   },
 
   formatPercentage: (value: number): string => {
-    return `${value.toFixed(1)}%`;
+    return `${(value * 100).toFixed(1)}%`;
   },
 
   getStatusColor: (status: string): string => {
@@ -329,6 +336,7 @@ export const PaymentPlanService = {
       'Cancelled': 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400',
       'Pending': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
       'On Hold': 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400',
+      'Denied': 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
     };
     return colors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
   },

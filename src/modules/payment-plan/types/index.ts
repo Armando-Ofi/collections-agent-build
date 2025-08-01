@@ -1,4 +1,3 @@
-
 // types/paymentPlans.ts
 
 export interface PaymentPlanLogEntry {
@@ -27,18 +26,28 @@ export interface PaymentPlan {
   log_entries: PaymentPlanLogEntry[];
 }
 
+// ✅ Nueva estructura de stats anidada
 export interface PaymentPlanStats {
-  totalPlans: number;
-  totalAmount: number;
-  activeAmount: number;
-  activePlans: number;
-  completedPlans: number;
-  completedAmount: number;
-  defaultedPlans: number;
-  defaultedAmount: number;
-  averageInstallments: number;
-  totalDiscountAmount: number;
-  successRate: number;
+  active_plans: {
+    total_active_plans: number;
+    active_amount: number;
+    avg_installments: number;
+    success_rate: number;
+  };
+  denied_plans: {
+    total_denied_plans: number;
+    avg_denied_plans: number;
+  };
+  defaulted_plans: {
+    total_defaulted_plans: number;
+    defaulted_amount: number;
+  };
+  total_plans: {
+    total_plans: number;
+    total_amount: number;
+    success_rate: number;
+    total_discounts: number;
+  };
 }
 
 export interface PaymentPlanFilters {
@@ -88,15 +97,14 @@ export type PaymentPlanStatus =
   | 'Defaulted' 
   | 'Cancelled' 
   | 'Pending' 
-  | 'On Hold';
+  | 'On Hold'
+  | 'Denied';
 
 export type PaymentInstallmentStatus = 
   | 'Pending' 
   | 'Paid' 
   | 'Overdue' 
   | 'Cancelled';
-
-  // types/paymentPlan.ts
 
 export interface PaymentPlanDetails {
   id: number;

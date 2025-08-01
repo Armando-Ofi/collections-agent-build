@@ -8,7 +8,7 @@ import type {
 } from '../types';
 
 const ENDPOINTS = {
-  COLLECTIONS_KPI: '/invoices-kpi/',
+  COLLECTIONS_KPI: '/kpi/invoices/',
 } as const;
 
 // Interfaces del backend (basadas en tu JSON real)

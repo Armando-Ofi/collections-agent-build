@@ -1,4 +1,3 @@
-
 // hooks/usePaymentPlans.ts
 
 import { useState, useCallback, useMemo } from 'react';
@@ -61,7 +60,12 @@ export const usePaymentPlans = (initialFilters: PaymentPlanFilters = {}) => {
     [paymentPlans]
   );
 
-  // Memoized stats - usar datos del API o calcular fallback
+  const completedPlans = useMemo(() => 
+    paymentPlans.filter(plan => plan.status === 'Completed'), 
+    [paymentPlans]
+  );
+
+  // ✅ Memoized stats - usar datos del API o calcular fallback con nueva estructura
   const stats = useMemo((): PaymentPlanStats => {
     if (statsData) {
       return statsData;
@@ -174,6 +178,7 @@ export const usePaymentPlans = (initialFilters: PaymentPlanFilters = {}) => {
     activePlans,
     deniedPlans,
     defaultedPlans,
+    completedPlans, // ✅ Agregar completedPlans
     stats,
     
     // Loading states

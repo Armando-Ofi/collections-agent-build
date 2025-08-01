@@ -11,7 +11,7 @@ import type {
 const ENDPOINTS = {
   RISK_ANALYSIS: '/invoices/?type=ontime',
   RISK_ANALYSIS_BY_ID: (id: number) => `/invoices/${id}?customer=yes`,
-  RISK_STATS: '/invoices-kpi/',
+  RISK_STATS: '/kpi/invoices/',
   RISK_ANALYTICS: '/risk-analysis/analytics',
   RISK_EXPORT: '/risk-analysis/export',
   RISK_IMPORT: '/risk-analysis/import',

@@ -78,7 +78,7 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
       label: "Status",
       sortable: true,
       render: (value: string, row: PrePaymentRiskAnalysis) => {
-        const isClickable = (value === "PP Active " || value === "PP Defaulted") && row.id && onStatusClick;
+        const isClickable = (value === "PP Active" || value === "PP Defaulted") && row.id && onStatusClick;
         
         return (
           <Badge 

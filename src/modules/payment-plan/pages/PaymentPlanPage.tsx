@@ -58,6 +58,7 @@ const PaymentPlansPage: React.FC = () => {
     activePlans,
     deniedPlans,
     defaultedPlans,
+    completedPlans,
     stats,
     isLoading,
     refetch,
@@ -183,7 +184,9 @@ const PaymentPlansPage: React.FC = () => {
                   <CreditCard className="w-4 h-4 text-green-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{stats.activePlans}</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stats.active_plans?.total_active_plans || 0}
+                  </div>
                   <p className="text-xs text-muted-foreground">Currently active</p>
                 </CardContent>
               </Card>
@@ -197,7 +200,7 @@ const PaymentPlansPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-foreground">
-                    {PaymentPlanService.formatAmountCompact(stats.activeAmount | 0)}
+                    {PaymentPlanService.formatAmountCompact(stats.active_plans?.active_amount || 0)}
                   </div>
                   <p className="text-xs text-muted-foreground">Total active amount</p>
                 </CardContent>
@@ -211,7 +214,9 @@ const PaymentPlansPage: React.FC = () => {
                   <Receipt className="w-4 h-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{stats.averageInstallments | 0}</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stats.active_plans?.avg_installments || 0}
+                  </div>
                   <p className="text-xs text-muted-foreground">Average payments</p>
                 </CardContent>
               </Card>
@@ -224,7 +229,9 @@ const PaymentPlansPage: React.FC = () => {
                   <TrendingUp className="w-4 h-4 text-orange-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{PaymentPlanService.formatPercentage(stats.successRate | 0)}</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {PaymentPlanService.formatPercentage(stats.active_plans?.success_rate || 0)}
+                  </div>
                   <p className="text-xs text-muted-foreground">Completion rate</p>
                 </CardContent>
               </Card>
@@ -252,61 +259,63 @@ const PaymentPlansPage: React.FC = () => {
           </div>
         </TabsContent>
 
-        {/* Completed Plans Tab */}
+        {/* Completed Plans Tab - ✅ Ahora muestra Denied Plans según el diseño */}
         <TabsContent value="completed-plans" className="mt-6">
           <div className="space-y-6">
-            {/* Completed Plans KPIs */}
+            {/* Denied Plans KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="glass-card hover-lift border-blue-500/20">
+              <Card className="glass-card hover-lift border-red-500/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Completed Plans
+                    Denied Plans
                   </CardTitle>
-                  <CheckCircle className="w-4 h-4 text-blue-500" />
+                  <CircleXIcon className="w-4 h-4 text-red-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{stats.completedPlans | 0}</div>
-                  <p className="text-xs text-muted-foreground">Successfully completed</p>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stats.denied_plans?.total_denied_plans || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Plans denied</p>
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card hover-lift border-red-500/20">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Average Denied
+                  </CardTitle>
+                  <TrendingUp className="w-4 h-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stats.denied_plans?.avg_denied_plans || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Average denials</p>
                 </CardContent>
               </Card>
 
               <Card className="glass-card hover-lift border-blue-500/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Completed Value
+                    Overall Success Rate
                   </CardTitle>
-                  <DollarSign className="w-4 h-4 text-blue-500" />
+                  <Percent className="w-4 h-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-foreground">
-                    {PaymentPlanService.formatAmountCompact(stats.completedAmount | 0)}
+                    {PaymentPlanService.formatPercentage(stats.total_plans?.success_rate || 0)}
                   </div>
-                  <p className="text-xs text-muted-foreground">Total collected</p>
-                </CardContent>
-              </Card>
-
-              <Card className="glass-card hover-lift border-blue-500/20">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total Discounts
-                  </CardTitle>
-                  <Percent className="w-4 h-4 text-purple-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-foreground">
-                    {PaymentPlanService.formatAmountCompact(stats.totalDiscountAmount | 0)}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Total discounts given</p>
+                  <p className="text-xs text-muted-foreground">Total success rate</p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Completed Plans Table */}
-            <Card className="glass-card border-blue-500/20">
+            {/* Denied Plans Table */}
+            <Card className="glass-card border-red-500/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-foreground">
-                  <CheckCircle className="w-5 h-5 text-blue-500" />
-                  Completed Payment Plans
+                  <CircleXIcon className="w-5 h-5 text-red-500" />
+                  Denied Payment Plans
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -336,7 +345,9 @@ const PaymentPlansPage: React.FC = () => {
                   <AlertTriangle className="w-4 h-4 text-red-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{stats.defaultedPlans | 0}</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stats.defaulted_plans?.total_defaulted_plans || 0}
+                  </div>
                   <p className="text-xs text-muted-foreground">Plans in default</p>
                 </CardContent>
               </Card>
@@ -350,7 +361,7 @@ const PaymentPlansPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-red-600">
-                    {PaymentPlanService.formatAmountCompact(stats.defaultedAmount | 0)}
+                    {PaymentPlanService.formatAmountCompact(stats.defaulted_plans?.defaulted_amount || 0)}
                   </div>
                   <p className="text-xs text-muted-foreground">Outstanding amount</p>
                 </CardContent>
@@ -392,7 +403,9 @@ const PaymentPlansPage: React.FC = () => {
                   <Receipt className="w-4 h-4 text-blue-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{stats.totalPlans | 0}</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stats.total_plans?.total_plans || 0}
+                  </div>
                   <p className="text-xs text-muted-foreground">All time plans</p>
                 </CardContent>
               </Card>
@@ -406,7 +419,7 @@ const PaymentPlansPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-foreground">
-                    {PaymentPlanService.formatAmountCompact(stats.totalAmount | 0)}
+                    {PaymentPlanService.formatAmountCompact(stats.total_plans?.total_amount || 0)}
                   </div>
                   <p className="text-xs text-muted-foreground">Total managed</p>
                 </CardContent>
@@ -420,7 +433,9 @@ const PaymentPlansPage: React.FC = () => {
                   <TrendingUp className="w-4 h-4 text-orange-500" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{PaymentPlanService.formatPercentage(stats.successRate | 0)}</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {PaymentPlanService.formatPercentage(stats.total_plans?.success_rate || 0)}
+                  </div>
                   <p className="text-xs text-muted-foreground">Overall completion</p>
                 </CardContent>
               </Card>
@@ -434,7 +449,7 @@ const PaymentPlansPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-foreground">
-                    {PaymentPlanService.formatAmountCompact(stats.totalDiscountAmount | 0)}
+                    {PaymentPlanService.formatAmountCompact(stats.total_plans?.total_discounts || 0)}
                   </div>
                   <p className="text-xs text-muted-foreground">Customer savings</p>
                 </CardContent>
