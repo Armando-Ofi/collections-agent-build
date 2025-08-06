@@ -8,6 +8,7 @@ import Dashboard from "./modules/Dashboard";
 import NotFound from "@/shared/components/common/NotFound"
 import { Provider } from "react-redux";
 import { store } from "./core/store/store";
+import PaymentPage from "./modules/payment/pages/PaymentPage";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               {/*<Route path="/*" element={<Dashboard />} />*/}
+              <Route path="/payment" element={<PaymentPage />} />
               <Route path="/*" element={<Dashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -215,7 +215,7 @@ const PaymentPlansPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-foreground">
-                    {stats.active_plans?.avg_installments || 0}
+                    {PaymentPlanService.formatAmountDecimal(stats.active_plans?.avg_installments) || 0}
                   </div>
                   <p className="text-xs text-muted-foreground">Average payments</p>
                 </CardContent>

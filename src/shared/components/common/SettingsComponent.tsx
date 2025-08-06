@@ -1,4 +1,4 @@
-import { Settings, Moon, Sun, Plus, Minus, Check, X, RefreshCw, AlertCircle } from "lucide-react";
+import { Settings, Moon, Sun, Plus, Minus, Check, X, RefreshCw, AlertCircle, UserCircle, Shield } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -9,10 +9,12 @@ import {
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useInterestRates } from "../../hooks/useInterestRates";
+import { useRole } from "@/shared/store/roleContext";
 import { cn } from "@/shared/lib/utils";
 
 const SettingsComponent = () => {
   const { theme, setTheme } = useTheme();
+  const { role, setRole } = useRole();
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { states, actions } = useInterestRates();
@@ -51,6 +53,32 @@ const SettingsComponent = () => {
     // Limpiar mensajes de estado al cerrar
     actions.clearStatusMessages();
     setIsOpen(false);
+  };
+
+  const handleRoleChange = (newRole: number) => {
+    setRole(newRole);
+  };
+
+  const getRoleName = (roleId: number) => {
+    switch (roleId) {
+      case 1:
+        return "Collections Agent";
+      case 2:
+        return "Manager";
+      default:
+        return "Unknown Role";
+    }
+  };
+
+  const getRoleDescription = (roleId: number) => {
+    switch (roleId) {
+      case 1:
+        return "Access to payment risk, payment plans, and collections tools";
+      case 2:
+        return "Management dashboard with analytics and team oversight";
+      default:
+        return "";
+    }
   };
 
   return (
@@ -92,7 +120,7 @@ const SettingsComponent = () => {
                     Settings
                   </h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Manage your theme preferences and interest rates configuration
+                    Manage your role, theme preferences and system configuration
                   </p>
                 </div>
                 <Button
@@ -108,6 +136,94 @@ const SettingsComponent = () => {
 
             {/* Content */}
             <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(85vh-120px)]">
+              {/* Role Settings */}
+              <div>
+                <h3 className="text-base font-semibold mb-2">Role Selection</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Choose your working role to access different features
+                </p>
+                <div className="space-y-3">
+                  <div 
+                    className={cn(
+                      "p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
+                      role === 1 
+                        ? "border-primary bg-primary/5 shadow-md" 
+                        : "border-border hover:border-primary/50"
+                    )}
+                    onClick={() => handleRoleChange(1)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-10 h-10 rounded-lg flex items-center justify-center",
+                          role === 1 
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-muted text-muted-foreground"
+                        )}>
+                          <UserCircle className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{getRoleName(1)}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {getRoleDescription(1)}
+                          </p>
+                        </div>
+                      </div>
+                      {role === 1 && (
+                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div 
+                    className={cn(
+                      "p-4 rounded-lg border-2 cursor-pointer transition-all duration-200",
+                      role === 2 
+                        ? "border-primary bg-primary/5 shadow-md" 
+                        : "border-border hover:border-primary/50"
+                    )}
+                    onClick={() => handleRoleChange(2)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-10 h-10 rounded-lg flex items-center justify-center",
+                          role === 2 
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-muted text-muted-foreground"
+                        )}>
+                          <Shield className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{getRoleName(2)}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {getRoleDescription(2)}
+                          </p>
+                        </div>
+                      </div>
+                      {role === 2 && (
+                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {role && (
+                  <div className="mt-3 p-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg">
+                    <p className="text-sm flex items-center gap-2">
+                      <Check className="h-4 w-4" />
+                      Currently active: {getRoleName(role)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Separator */}
+              <div className="border-t border-border" />
+
               {/* Theme Settings */}
               <div>
                 <h3 className="text-base font-semibold mb-2">Theme</h3>
@@ -139,151 +255,153 @@ const SettingsComponent = () => {
               {/* Separator */}
               <div className="border-t border-border" />
 
-              {/* Interest Rates Settings */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="text-base font-semibold">Interest Rates by Country</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Configure interest rates for different countries
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {states.hasChanges && (
-                      <span className="px-2 py-1 text-xs rounded-full bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 animate-pulse">
-                        Unsaved changes
-                      </span>
-                    )}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={actions.forceRefresh}
-                          disabled={states.loading}
-                          className="flex items-center gap-1"
-                        >
-                          <RefreshCw className={cn("h-3 w-3", states.loading && "animate-spin")} />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Refresh data from server</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </div>
-
-                {/* Loading State */}
-                {states.loading && (
-                  <div className="flex items-center justify-center py-8">
-                    <RefreshCw className="h-6 w-6 animate-spin mr-2" />
-                    <span>Loading interest rates...</span>
-                  </div>
-                )}
-
-                {/* Unified Status Banner - Shows either error or success, never both */}
-                {(states.error || states.success) && (
-                  <div className={cn(
-                    "flex items-center gap-2 p-3 rounded-lg mb-4",
-                    states.error 
-                      ? "bg-red-500/10 text-red-600 dark:text-red-400"
-                      : "bg-green-500/10 text-green-600 dark:text-green-400"
-                  )}>
-                    {states.error ? (
-                      <AlertCircle className="h-4 w-4" />
-                    ) : (
-                      <Check className="h-4 w-4" />
-                    )}
-                    <span className="text-sm flex-1">
-                      {states.error || "Changes saved successfully"}
-                    </span>
-                    {states.error && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={actions.retryFetch}
-                        className="hover:bg-red-500/20"
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                )}
-
-                {/* Interest Rates List */}
-                {!states.loading && states.interestRates.length > 0 && (
-                  <div className="space-y-3">
-                    {states.interestRates.map((rate) => (
-                      <div key={rate.id} className="glass-card p-4 rounded-lg border border-border">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <span className="font-medium">{rate.country_name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => actions.decrementInterest(rate.id, 0.1)}
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <div className="flex items-center gap-1">
-                              <input
-                                type="number"
-                                value={rate.interest}
-                                onChange={(e) => handleInterestChange(rate.id, e.target.value)}
-                                className="w-20 text-center px-2 py-1 text-sm border border-border rounded bg-background"
-                                step="0.01"
-                                min="0"
-                              />
-                              <span className="text-sm text-muted-foreground">%</span>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => actions.incrementInterest(rate.id, 0.1)}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                {states.interestRates.length > 0 && (
-                  <div className="flex items-center justify-end gap-2 pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={handleDiscardChanges}
-                      disabled={!states.hasChanges || states.saving}
-                      className="flex items-center gap-2"
-                    >
-                      <X className="h-4 w-4" />
-                      Discard Changes
-                    </Button>
-                    <Button
-                      onClick={handleSaveChanges}
-                      disabled={!states.hasChanges || states.saving}
-                      className={cn(
-                        "flex items-center gap-2",
-                        states.hasChanges && "animate-pulse"
+              {/* Interest Rates Settings - Solo mostrar para rol 1 */}
+              {role === 1 && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="text-base font-semibold">Interest Rates by Country</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Configure interest rates for different countries
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {states.hasChanges && (
+                        <span className="px-2 py-1 text-xs rounded-full bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 animate-pulse">
+                          Unsaved changes
+                        </span>
                       )}
-                    >
-                      {states.saving ? (
-                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={actions.forceRefresh}
+                            disabled={states.loading}
+                            className="flex items-center gap-1"
+                          >
+                            <RefreshCw className={cn("h-3 w-3", states.loading && "animate-spin")} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Refresh data from server</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </div>
+
+                  {/* Loading State */}
+                  {states.loading && (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw className="h-6 w-6 animate-spin mr-2" />
+                      <span>Loading interest rates...</span>
+                    </div>
+                  )}
+
+                  {/* Unified Status Banner - Shows either error or success, never both */}
+                  {(states.error || states.success) && (
+                    <div className={cn(
+                      "flex items-center gap-2 p-3 rounded-lg mb-4",
+                      states.error 
+                        ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                        : "bg-green-500/10 text-green-600 dark:text-green-400"
+                    )}>
+                      {states.error ? (
+                        <AlertCircle className="h-4 w-4" />
                       ) : (
                         <Check className="h-4 w-4" />
                       )}
-                      {states.saving ? "Saving..." : "Save Changes"}
-                    </Button>
-                  </div>
-                )}
-              </div>
+                      <span className="text-sm flex-1">
+                        {states.error || "Changes saved successfully"}
+                      </span>
+                      {states.error && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={actions.retryFetch}
+                          className="hover:bg-red-500/20"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Interest Rates List */}
+                  {!states.loading && states.interestRates.length > 0 && (
+                    <div className="space-y-3">
+                      {states.interestRates.map((rate) => (
+                        <div key={rate.id} className="glass-card p-4 rounded-lg border border-border">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <span className="font-medium">{rate.country_name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => actions.decrementInterest(rate.id, 0.1)}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  value={rate.interest}
+                                  onChange={(e) => handleInterestChange(rate.id, e.target.value)}
+                                  className="w-20 text-center px-2 py-1 text-sm border border-border rounded bg-background"
+                                  step="0.01"
+                                  min="0"
+                                />
+                                <span className="text-sm text-muted-foreground">%</span>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => actions.incrementInterest(rate.id, 0.1)}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  {states.interestRates.length > 0 && (
+                    <div className="flex items-center justify-end gap-2 pt-4">
+                      <Button
+                        variant="outline"
+                        onClick={handleDiscardChanges}
+                        disabled={!states.hasChanges || states.saving}
+                        className="flex items-center gap-2"
+                      >
+                        <X className="h-4 w-4" />
+                        Discard Changes
+                      </Button>
+                      <Button
+                        onClick={handleSaveChanges}
+                        disabled={!states.hasChanges || states.saving}
+                        className={cn(
+                          "flex items-center gap-2",
+                          states.hasChanges && "animate-pulse"
+                        )}
+                      >
+                        {states.saving ? (
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="h-4 w-4" />
+                        )}
+                        {states.saving ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>,

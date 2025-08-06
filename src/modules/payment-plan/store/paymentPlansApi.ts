@@ -316,6 +316,10 @@ export const PaymentPlanService = {
     return `$${amount.toFixed(0)}`;
   },
 
+  formatAmountDecimal: (amount: number): string => {
+  return `$${amount.toFixed(2)}`;
+  },
+
   formatDate: (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
