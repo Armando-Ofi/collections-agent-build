@@ -14,7 +14,7 @@ export interface PaymentItem {
 }
 
 export interface PaymentProcessRequest {
-  payment_id: string;
+  id: string;
   type: 'installment' | 'invoice';
   amount: string;
 }

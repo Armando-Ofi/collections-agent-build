@@ -6,19 +6,19 @@ class PaymentService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = 'https://collection-agent.api.sofiatechnology.ai/pay/';
+    this.baseUrl = 'https://collection-agent.api.sofiatechnology.ai/pay';
   }
 
   /**
    * Get authentication headers
    */
   private getHeaders(): HeadersInit {
-    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-    
+    //const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
     return {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-      'X-Client-Version': process.env.REACT_APP_VERSION || '1.0.0',
+      //...(token && { 'Authorization': `Bearer ${token}` }),
+      //'X-Client-Version': process.env.REACT_APP_VERSION || '1.0.0',
     };
   }
 
@@ -28,14 +28,14 @@ class PaymentService {
   private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-      
+
       try {
         const errorData = await response.json();
         errorMessage = errorData.message || errorData.error || errorMessage;
       } catch {
         // If response is not JSON, use status text
       }
-      
+
       throw new Error(errorMessage);
     }
 
@@ -47,13 +47,13 @@ class PaymentService {
    */
   async getPaymentItem(type: 'installment' | 'invoice', id: string): Promise<PaymentItem> {
     try {
-      const response = await fetch(`${this.baseUrl}/${type}/${id}`, {
+      const response = await fetch(`${this.baseUrl}/${id}`, {
         method: 'GET',
         headers: this.getHeaders(),
       });
 
       const data = await this.handleResponse<PaymentItem>(response);
-      
+
       // Calculate overdue days if status is overdue
       if (data.status === 'overdue' && data.due_date) {
         const dueDate = new Date(data.due_date);
@@ -75,17 +75,40 @@ class PaymentService {
    */
   async processPayment(request: PaymentProcessRequest): Promise<PaymentProcessResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/process`, {
+      const response = await fetch(`https://n8n.sofiatechnology.ai/webhook/8f30104f-91cc-4221-a197-ab624c7f315f`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify(request),
       });
 
-      const data = await this.handleResponse<PaymentProcessResponse>(response);
-      return data;
+      // Obtener la respuesta raw de la API
+      const apiResponse = await this.handleResponse<{ content: string }>(response);
+
+      // Crear el PaymentProcessResponse localmente
+      const paymentResponse: PaymentProcessResponse = {
+        success: apiResponse.content === "Payment logged",
+        payment_id: request.id, // Usar el ID de la request como payment_id
+        transaction_id: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Generar transaction_id único
+        message: apiResponse.content || "Payment processed"
+      };
+
+      // Si el payment no fue exitoso, agregar error_code
+      if (!paymentResponse.success) {
+        paymentResponse.error_code = "PAYMENT_FAILED";
+      }
+
+      return paymentResponse;
+
     } catch (error) {
       console.error('Error processing payment:', error);
-      throw error;
+
+      // En caso de error, retornar un PaymentProcessResponse con error
+      return {
+        success: false,
+        payment_id: request.id,
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+        error_code: "API_ERROR"
+      };
     }
   }
 
@@ -94,7 +117,7 @@ class PaymentService {
    */
   async retryPayment(paymentId: string, type: 'installment' | 'invoice', amount: string): Promise<PaymentProcessResponse> {
     return this.processPayment({
-      payment_id: paymentId,
+      id: paymentId,
       type,
       amount,
     });
@@ -159,7 +182,7 @@ class PaymentService {
    * Check if payment can be processed
    */
   canPayNow(status: string): boolean {
-    return ['failed', 'overdue', 'pending'].includes(status);
+    return ['Failed', 'Overdue', 'Pending'].includes(status);
   }
 }
 
