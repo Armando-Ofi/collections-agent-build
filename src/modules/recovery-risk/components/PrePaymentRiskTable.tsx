@@ -13,7 +13,6 @@ interface PrePaymentRiskTableProps {
   onEmailReminder: (id: number) => void;
   onCallReminder: (id: number) => void;
   onStatusClick?: (paymentPlanId: string) => void; // Nueva prop para manejar click en status
-  onOpenCalendar: (id: number) => void; // Nueva prop para abrir el calendario
   isLoading?: boolean;
 }
 
@@ -24,7 +23,6 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
   onCallReminder,
   onEmailReminder,
   onStatusClick,
-  onOpenCalendar,
   isLoading = false
 }) => {
   const columns = [
@@ -155,10 +153,6 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
     onCallReminder(Number(id));
   }
 
-  const handleOpenCalendar = (id: string) => {
-    onOpenCalendar(Number(id));
-  }
-
   return (
     <DataTable
       data={data}
@@ -167,7 +161,6 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
       onViewActionLogs={handleViewActionLogs}
       onRemindByCall={handleCallReminder}
       onRemindByEmail={handleEmailReminder}
-      onOpenCalendar={handleOpenCalendar}
       searchPlaceholder="Search invoices..."
       loading={isLoading}
     />

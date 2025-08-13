@@ -33,6 +33,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Mail,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
@@ -55,6 +56,7 @@ interface DataTableProps {
   onTakeFirstAction?: (row: any) => void;
   onRemindByEmail?: (row: any) => void;
   onRemindByCall?: (row: any) => void;
+  onOpenCalendar?: (row: any) => void;
   searchPlaceholder?: string;
   className?: string;
   loading?: boolean;
@@ -71,6 +73,7 @@ const DataTable = ({
   onDelete,
   onRemindByCall,
   onRemindByEmail,
+  onOpenCalendar,
   searchPlaceholder = "Search...",
   className,
   loading = false,
@@ -307,6 +310,15 @@ const DataTable = ({
                             >
                               <Phone className="w-4 h-4" />
                               Send Call Reminder
+                            </DropdownMenuItem>
+                          )}
+                          {onOpenCalendar && (
+                            <DropdownMenuItem
+                              onClick={() => onOpenCalendar(row.id)}
+                              className="flex items-center gap-2"
+                            >
+                              <Calendar className="w-4 h-4" />
+                              Calendar View
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>

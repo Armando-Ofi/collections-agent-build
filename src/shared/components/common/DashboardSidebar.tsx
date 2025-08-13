@@ -57,23 +57,11 @@ const managerNavigation = [
     description: "Dashboard & Analytics",
   },
   {
-    title: "Team Performance",
-    url: "/team-performance",
+    title: "Recovery Risk",
+    url: "/recovery-risk",
     icon: Activity,
     description: "Agent Performance Metrics",
   },
-  {
-    title: "Reports",
-    url: "/reports",
-    icon: FileText,
-    description: "Management Reports",
-  },
-  {
-    title: "Analytics",
-    url: "/analytics",
-    icon: PieChart,
-    description: "Advanced Analytics",
-  }
 ];
 
 const DashboardSidebar = () => {
@@ -87,15 +75,15 @@ const DashboardSidebar = () => {
     switch (roleId) {
       case 1:
         return {
-          name: "Collections Agent",
+          name: "Standard AR Collections",
           icon: UserCircle,
-          description: "Agent Dashboard"
+          description: "Collections Dashboard"
         };
       case 2:
         return {
-          name: "Manager",
+          name: "Collections Agency",
           icon: Shield,
-          description: "Management Dashboard"
+          description: "Overdue Accounts"
         };
       default:
         return {

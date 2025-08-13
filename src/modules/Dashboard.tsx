@@ -10,6 +10,7 @@ import LeadsPage from "./leads/pages/LeadPage";
 import PrePaymentRiskPage from "./payment-risk/pages/PrePaymentRiskPage";
 import CollectionsOverview from "./overview/page/CollectionsOverview";
 import PaymentPlansPage from "./payment-plan/pages/PaymentPlanPage";
+import RecoveryRiskPage from "./recovery-risk/pages/RecoveryRiskPage";
 
 // Placeholder components para Rol 2 - Manager (por crear)
 const TeamPerformancePage = () => (
@@ -51,7 +52,6 @@ const DashboardRoutes = () => {
       {/* Rutas específicas para Collections Agent (Rol 1) */}
       {role === 1 && (
         <>
-          <Route path="/leads" element={<LeadsPage />} />
           <Route path="/payment-plan" element={<PaymentPlansPage />} />
           <Route path="/payment-risk" element={<PrePaymentRiskPage />} />
         </>
@@ -60,7 +60,7 @@ const DashboardRoutes = () => {
       {/* Rutas específicas para Manager (Rol 2) */}
       {role === 2 && (
         <>
-          <Route path="/team-performance" element={<TeamPerformancePage />} />
+          <Route path="/recovery-risk" element={<RecoveryRiskPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
         </>

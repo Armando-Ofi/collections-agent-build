@@ -47,7 +47,7 @@ class PaymentService {
    */
   async getPaymentItem(type: 'installment' | 'invoice', id: string): Promise<PaymentItem> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}`, {
+      const response = await fetch(`${this.baseUrl}/${id}?type=${type}`, {
         method: 'GET',
         headers: this.getHeaders(),
       });

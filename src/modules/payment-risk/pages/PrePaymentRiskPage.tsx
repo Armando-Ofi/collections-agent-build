@@ -28,6 +28,7 @@ import ActivityLogsOverview from '../components/ActivityLogsOverview';
 import type { PrePaymentRiskAnalysis } from '../types';
 import Error from '@/shared/components/common/Error';
 import { useReminder } from '../hooks/useReminder';
+import { CalendarDialog } from '@/shared/components/common/CalendarDialog';
 
 const PrePaymentRiskPage: React.FC = () => {
   // ✅ Estados para el dialog de análisis de riesgo
@@ -37,6 +38,9 @@ const PrePaymentRiskPage: React.FC = () => {
   // ✅ Estados para el dialog de activity logs
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
   const [isViewActivityLogsOpen, setIsViewActivityLogsOpen] = useState(false);
+
+  const [selectedCalendarPlan, setSelectedCalendarPlan] = useState(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   
   const [activeTab, setActiveTab] = useState("risk-analysis");
 
@@ -77,6 +81,16 @@ const PrePaymentRiskPage: React.FC = () => {
   const handleStatusClick = (paymentPlanId: string) => {
     // Navegar a la página de Payment Plans con el tab "all-plans" y búsqueda automática
     navigate(`/payment-plan?tab=all-plans&search=PP_${paymentPlanId}`);
+  };
+
+  const handleOpenCalendar = (paymentPlanId: number) => {
+    setSelectedCalendarPlan(paymentPlanId);
+    setIsCalendarOpen(true);
+  };
+
+  const handleCloseCalendar = () => {
+    setIsCalendarOpen(false);
+    setSelectedCalendarPlan(null);
   };
 
   const handleUpdatePaymentPlan = async (id: number, plan: string) => {
@@ -217,6 +231,7 @@ const PrePaymentRiskPage: React.FC = () => {
                   onView={handleView}
                   onActionLogs={handleOpenActivityLogs}
                   onStatusClick={handleStatusClick} // ✅ Nueva prop
+                  onOpenCalendar={handleOpenCalendar} // Nueva prop para abrir el calendario
                   isLoading={isLoading}
                 />
               </CardContent>
@@ -300,6 +315,7 @@ const PrePaymentRiskPage: React.FC = () => {
                   onView={handleView}
                   onActionLogs={handleOpenActivityLogs}
                   onStatusClick={handleStatusClick} // ✅ Nueva prop también aquí
+                  onOpenCalendar={handleOpenCalendar} // Nueva prop para abrir el calendario
                   isLoading={isLoading}
                 />
               </CardContent>
@@ -320,6 +336,11 @@ const PrePaymentRiskPage: React.FC = () => {
         invoiceId={selectedInvoiceId}
         isOpen={isViewActivityLogsOpen}
         onClose={handleCloseActivityLogs}
+      />
+
+      <CalendarDialog 
+        isOpen={isCalendarOpen}
+        onClose={handleCloseCalendar}
       />
     </div>
   );

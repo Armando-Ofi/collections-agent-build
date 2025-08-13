@@ -1,11 +1,12 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { leadsApi } from '@/modules/leads/store/leadsApi';
+import { baseApi } from '../api/apiClient';
 
 export const store = configureStore({
   reducer: {
     // Add the RTK Query reducer
-    [leadsApi.reducerPath]: leadsApi.reducer,
+    [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

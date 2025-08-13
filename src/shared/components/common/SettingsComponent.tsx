@@ -62,9 +62,9 @@ const SettingsComponent = () => {
   const getRoleName = (roleId: number) => {
     switch (roleId) {
       case 1:
-        return "Collections Agent";
+        return "Standard AR Collections";
       case 2:
-        return "Manager";
+        return "Collections Agency";
       default:
         return "Unknown Role";
     }
