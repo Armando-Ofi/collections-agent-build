@@ -95,7 +95,7 @@ export const CollectionRiskTable: React.FC<PrePaymentRiskTableProps> = ({
       label: "Recovery Percentage",
       sortable: true,
       render: (value: number, row: PrePaymentRiskAnalysis) => {
-        const scorePercent = Math.round((1 - value) * 100);
+        const scorePercent = Math.round((value) * 100);
         return (
           <div className="flex items-center gap-2">
             <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">

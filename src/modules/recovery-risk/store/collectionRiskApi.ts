@@ -9,7 +9,7 @@ import type {
 
 const ENDPOINTS = {
   COLLECTION_ANALYSIS: '/invoices/?collection=true',
-  COLLECTION_ANALYSIS_BY_ID: (id: number) => `/invoices/${id}?customer=yes`,
+  COLLECTION_ANALYSIS_BY_ID: (id: number) => `/invoices/${id}?customer=yes&collection=true`,
   COLLECTION_STATS: '/kpi/invoices/high-overdue-summary',
   COLLECTION_ANALYTICS: '/risk-analysis/analytics',
   COLLECTION_EXPORT: '/risk-analysis/export',

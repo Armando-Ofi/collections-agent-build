@@ -27,7 +27,7 @@ export interface DialogStates {
 const API_CONFIG = {
   BASE_URL: 'https://collection-agent.api.sofiatechnology.ai',
   ENDPOINTS: {
-    ANALYSIS: (id: number) => `/invoices/${id}?customer=yes`,
+    ANALYSIS: (id: number) => `/invoices/${id}?customer=yes&collection=true`,
     PAYMENT_PLANS: (id: number) => `https://n8n.sofiatechnology.ai/webhook/d0208321-997d-4e73-b718-848e50aeec26?id=${id}`,
     OFFER_EMAIL: () => `https://n8n.sofiatechnology.ai/webhook/a0356918-f334-4370-8f1d-01aab8f42b4f`,
     OFFER_CALL: () => `https://n8n.sofiatechnology.ai/webhook/58e42a53-c8b4-4813-9ebd-72eb35cd23e7`,

@@ -17,7 +17,7 @@ import { PrePaymentRiskService } from '../services/prePaymentRiskService';
 
 // Components
 import { CollectionRiskTable } from '../components/PrePaymentRiskTable';
-import { PrePaymentRiskViewDialog } from '../components/PrePaymentRiskDialog';
+import { PrePaymentRiskViewDialog } from '../components/RecoveryRiskDialog';
 import ActivityLogsOverview from '../components/ActivityLogsOverview';
 
 // Types
