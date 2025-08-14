@@ -16,7 +16,7 @@ import { useCollections } from '../hooks/useCollections';
 import { PrePaymentRiskService } from '../services/prePaymentRiskService';
 
 // Components
-import { PrePaymentRiskTable } from '../components/PrePaymentRiskTable';
+import { CollectionRiskTable } from '../components/PrePaymentRiskTable';
 import { PrePaymentRiskViewDialog } from '../components/PrePaymentRiskDialog';
 import ActivityLogsOverview from '../components/ActivityLogsOverview';
 
@@ -186,7 +186,7 @@ const RecoveryRiskPage: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <PrePaymentRiskTable
+          <CollectionRiskTable
             data={riskAnalyses}
             onCallReminder={handleCallReminder}
             onEmailReminder={handleEmailReminder}

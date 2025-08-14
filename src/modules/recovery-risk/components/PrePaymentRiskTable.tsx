@@ -1,10 +1,12 @@
 import React from 'react';
 import { Badge } from "@/shared/components/ui/badge";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Calendar, AlertCircle, AlertTriangle } from "lucide-react";
 import { cn } from '@/shared/lib/utils';
 import DataTable from "@/shared/components/common/DataTable";
 import type { PrePaymentRiskAnalysis } from '../types';
 import { PrePaymentRiskService } from '../services/prePaymentRiskService';
+import { Row } from 'react-day-picker';
+import { s } from 'node_modules/framer-motion/dist/types.d-CtuPurYT';
 
 interface PrePaymentRiskTableProps {
   data: PrePaymentRiskAnalysis[];
@@ -16,7 +18,7 @@ interface PrePaymentRiskTableProps {
   isLoading?: boolean;
 }
 
-export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
+export const CollectionRiskTable: React.FC<PrePaymentRiskTableProps> = ({
   data,
   onView,
   onActionLogs,
@@ -62,12 +64,6 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
               <div className="text-sm font-medium text-foreground">
                 {PrePaymentRiskService.formatDate(value)}
               </div>
-              {daysOverdue > 0 && row.status !== "Paid" && (
-                <div className="text-xs text-red-600 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />
-                  {daysOverdue} days overdue
-                </div>
-              )}
             </div>
           </div>
         );
@@ -79,9 +75,9 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
       sortable: true,
       render: (value: string, row: PrePaymentRiskAnalysis) => {
         const isClickable = (value === "PP Active" || value === "PP Defaulted") && row.id && onStatusClick;
-        
+
         return (
-          <Badge 
+          <Badge
             className={cn(
               "glass-card dark:border-white/20 border-gray-300/50",
               PrePaymentRiskService.getStatusColor(value),
@@ -96,14 +92,14 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
     },
     {
       key: "last_risk_score",
-      label: "Risk Score",
+      label: "Recovery Percentage",
       sortable: true,
       render: (value: number, row: PrePaymentRiskAnalysis) => {
-        const scorePercent = Math.round(value * 100);
+        const scorePercent = Math.round((1 - value) * 100);
         return (
           <div className="flex items-center gap-2">
             <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
-              <div 
+              <div
                 className={`h-full rounded-full ${PrePaymentRiskService.getRiskProgressColor(scorePercent)}`}
                 style={{ width: `${scorePercent}%` }}
               />
@@ -127,11 +123,47 @@ export const PrePaymentRiskTable: React.FC<PrePaymentRiskTableProps> = ({
       ),
     },
     {
-      key: "payment_terms",
-      label: "Terms",
-      render: (value: string) => (
+      key: "debt_age",
+      label: "Debt Age",  
+      sortable: true,
+      render: (value: string, row: PrePaymentRiskAnalysis) => (
         <div className="text-sm text-muted-foreground">
-          {value}
+          {PrePaymentRiskService.formatDebtAge(row.due_date)}
+        </div>
+      )
+    },
+    {
+      key: "escalated",
+      label: "Escalated",
+      sortable: true,
+      render: (value: boolean, row: PrePaymentRiskAnalysis) => (
+        <div className="flex items-center justify-center">
+          {value ? (
+            <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-300 dark:border-red-800">
+              <AlertTriangle className="w-3 h-3 mr-1" />
+              Escalated
+            </Badge>
+          ) : (
+            <Badge className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-300 dark:border-gray-600">
+              Normal
+            </Badge>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "creditor_type",
+      label: "Creditor Type",
+      sortable: true,
+      render: (value: string, row: PrePaymentRiskAnalysis) => (
+        <div className="text-sm text-foreground">
+          {value && value.trim() !== "" ? (
+            <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-300 dark:border-blue-800">
+              {value}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground italic">Not defined</span>
+          )}
         </div>
       ),
     },

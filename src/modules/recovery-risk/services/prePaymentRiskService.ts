@@ -360,4 +360,46 @@ export class PrePaymentRiskService {
     return `${(decimal * 100).toFixed(2)}%`;
   }
 
+  static formatDebtAge(dueDate: string | Date): string {
+    const due = new Date(dueDate);
+    const today = new Date();
+    
+    // Reset time to midnight for accurate day calculation
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    
+    const diffTime = today.getTime() - due.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+      const futureDays = Math.abs(diffDays);
+      if (futureDays === 1) return "Due tomorrow";
+      if (futureDays <= 7) return `Due in ${futureDays} days`;
+      if (futureDays <= 30) return `Due in ${Math.floor(futureDays / 7)} week${Math.floor(futureDays / 7) !== 1 ? 's' : ''}`;
+      return `Due in ${Math.floor(futureDays / 30)} month${Math.floor(futureDays / 30) !== 1 ? 's' : ''}`;
+    }
+    
+    if (diffDays === 0) return "Due today";
+    
+    if (diffDays === 1) return "1 day overdue";
+    if (diffDays <= 7) return `${diffDays} days overdue`;
+    if (diffDays <= 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return `${weeks} week${weeks !== 1 ? 's' : ''} overdue`;
+    }
+    if (diffDays <= 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months !== 1 ? 's' : ''} overdue`;
+    }
+    
+    const years = Math.floor(diffDays / 365);
+    const remainingMonths = Math.floor((diffDays % 365) / 30);
+    
+    if (remainingMonths === 0) {
+      return `${years} year${years !== 1 ? 's' : ''} overdue`;
+    }
+    
+    return `${years} year${years !== 1 ? 's' : ''}, ${remainingMonths} month${remainingMonths !== 1 ? 's' : ''} overdue`;
+  }
+
 }
