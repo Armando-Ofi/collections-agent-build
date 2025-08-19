@@ -62,6 +62,12 @@ const managerNavigation = [
     icon: Activity,
     description: "Agent Performance Metrics",
   },
+  {
+    title: "Payment Plans",
+    url: "/payment-plan",
+    icon: Wallet,
+    description: "Clients Payment Plans",
+  }
 ];
 
 const DashboardSidebar = () => {

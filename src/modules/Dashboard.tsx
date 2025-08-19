@@ -5,12 +5,12 @@ import DashboardSidebar from "@/shared/components/common/DashboardSidebar";
 import NotFound from "@/shared/components/common/NotFound";
 import { useRole } from "@/shared/store/roleContext";
 
-// Importaciones existentes (Rol 1 - Collections Agent)
-import LeadsPage from "./leads/pages/LeadPage";
+// Importaciones existentes (Rol 1 - Collections Agent
 import PrePaymentRiskPage from "./payment-risk/pages/PrePaymentRiskPage";
 import CollectionsOverview from "./overview/page/CollectionsOverview";
 import PaymentPlansPage from "./payment-plan/pages/PaymentPlanPage";
 import RecoveryRiskPage from "./recovery-risk/pages/RecoveryRiskPage";
+import FinancialOverview from "./financial-overview/page/FinancialOverview";
 
 // Placeholder components para Rol 2 - Manager (por crear)
 const TeamPerformancePage = () => (
@@ -46,12 +46,12 @@ const DashboardRoutes = () => {
   return (
     <Routes>
       {/* Ruta común para ambos roles */}
-      <Route path="/" element={<CollectionsOverview />} />
-      <Route path="/overview" element={<CollectionsOverview />} />
 
       {/* Rutas específicas para Collections Agent (Rol 1) */}
       {role === 1 && (
         <>
+          <Route path="/" element={<CollectionsOverview />} />
+          <Route path="/overview" element={<CollectionsOverview />} />
           <Route path="/payment-plan" element={<PaymentPlansPage />} />
           <Route path="/payment-risk" element={<PrePaymentRiskPage />} />
         </>
@@ -60,8 +60,10 @@ const DashboardRoutes = () => {
       {/* Rutas específicas para Manager (Rol 2) */}
       {role === 2 && (
         <>
+          <Route path="/" element={<FinancialOverview />} />
+          <Route path="/overview" element={<FinancialOverview />} />
           <Route path="/recovery-risk" element={<RecoveryRiskPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/payment-plan" element={<PaymentPlansPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
         </>
       )}

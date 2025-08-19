@@ -1,4 +1,3 @@
-
 // components/CalendarDialog.tsx
 
 import React, { useState } from 'react';
@@ -12,6 +11,27 @@ import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
 import {
   ChevronLeft,
   ChevronRight,
@@ -27,7 +47,10 @@ import {
   Loader2,
   Eye,
   Plus,
-  MoreHorizontal
+  MoreHorizontal,
+  Trash2,
+  Edit,
+  X
 } from "lucide-react";
 import { cn } from '@/shared/lib/utils';
 import { useCalendar, type CalendarEvent } from '../../hooks/useCalendar';
@@ -37,6 +60,15 @@ interface CalendarDialogProps {
   onClose: () => void;
   paymentPlanId?: string;
   customerName?: string;
+}
+
+interface CreateEventFormData {
+  title: string;
+  description: string;
+  time: string;
+  type: CalendarEvent['type'];
+  priority: CalendarEvent['priority'];
+  amount: string;
 }
 
 // Helper functions
@@ -136,6 +168,8 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
     loadMonth,
     selectDate,
     markEventCompleted,
+    createEvent,
+    deleteEvent,
     goToNextMonth,
     goToPreviousMonth,
     goToToday,
@@ -145,6 +179,18 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
   } = useCalendar(paymentPlanId);
 
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [showCreateEventForm, setShowCreateEventForm] = useState(false);
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
+
+  const [formData, setFormData] = useState<CreateEventFormData>({
+    title: '',
+    description: '',
+    time: '',
+    type: 'email_reminder',
+    priority: 'medium',
+    amount: ''
+  });
 
   if (!currentMonth) {
     return null;
@@ -229,6 +275,7 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
   const handleDateClick = (date: string, isCurrentMonth: boolean) => {
     if (!isCurrentMonth) return;
     selectDate(date);
+    setSelectedEvent(null);
   };
 
   const handleEventClick = (event: CalendarEvent) => {
@@ -238,6 +285,82 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
   const handleMarkCompleted = async (eventId: string) => {
     await markEventCompleted(eventId);
     setSelectedEvent(null);
+  };
+
+  const handleCreateEvent = () => {
+    if (!selectedDate) return;
+    setShowCreateEventForm(true);
+    // Set default time to current time + 1 hour
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    const defaultTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    setFormData(prev => ({ ...prev, time: defaultTime }));
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDate || isCreatingEvent) return;
+
+    setIsCreatingEvent(true);
+    try {
+      await createEvent({
+        title: formData.title,
+        description: formData.description,
+        date: selectedDate,
+        time: formData.time || undefined,
+        type: formData.type,
+        status: 'pending',
+        priority: formData.priority,
+        paymentPlanId: paymentPlanId || 'default',
+        customerName: customerName || 'Unknown Customer',
+        amount: formData.amount ? parseFloat(formData.amount) : undefined,
+        metadata: {
+          source: 'manual_entry',
+          automated: false
+        }
+      });
+
+      // Reset form and close
+      setFormData({
+        title: '',
+        description: '',
+        time: '',
+        type: 'email_reminder',
+        priority: 'medium',
+        amount: ''
+      });
+      setShowCreateEventForm(false);
+      
+      // Refresh the selected date to show the new event
+      selectDate(selectedDate);
+    } catch (error) {
+      console.error('Error creating event:', error);
+    } finally {
+      setIsCreatingEvent(false);
+    }
+  };
+
+  const handleDeleteEvent = async (event: CalendarEvent) => {
+    await deleteEvent(event.id);
+    setEventToDelete(null);
+    setSelectedEvent(null);
+    
+    // Refresh the selected date
+    if (selectedDate) {
+      selectDate(selectedDate);
+    }
+  };
+
+  const resetCreateForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      time: '',
+      type: 'email_reminder',
+      priority: 'medium',
+      amount: ''
+    });
+    setShowCreateEventForm(false);
   };
 
   return (
@@ -255,7 +378,7 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex h-full gap-6">
+        <div className="flex h-full gap-6 overflow-hidden">
           {/* Main Calendar */}
           <div className="flex-1 flex flex-col">
             {/* Calendar Header */}
@@ -400,20 +523,186 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
           {/* Event Details Sidebar */}
           <div className="w-80 border-l border-border pl-6">
             <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-foreground">
                   {selectedDate ? (
                     `Events for ${new Date(selectedDate).toLocaleDateString()}`
                   ) : (
                     'Select a date'
                   )}
                 </h3>
-                {selectedDate && selectedEvents.length === 0 && (
-                  <p className="text-muted-foreground text-sm">No events on this date</p>
+                {selectedDate && (
+                  <Button
+                    size="sm"
+                    onClick={handleCreateEvent}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Event
+                  </Button>
                 )}
               </div>
 
-              <ScrollArea className="h-[calc(100vh-200px)]">
+              {selectedDate && selectedEvents.length === 0 && !showCreateEventForm && (
+                <div className="text-center py-8">
+                  <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm mb-4">No events on this date</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCreateEvent}
+                    className="glass-card"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create First Event
+                  </Button>
+                </div>
+              )}
+
+              {/* Create Event Form */}
+              {showCreateEventForm && (
+                <Card className="glass-card border-primary/20">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        Create New Event
+                      </CardTitle>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={resetCreateForm}
+                        className="h-8 w-8 p-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <form onSubmit={handleFormSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="title" className="text-xs font-medium">Title *</Label>
+                        <Input
+                          id="title"
+                          value={formData.title}
+                          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="Event title"
+                          required
+                          className="h-8 text-sm"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="type" className="text-xs font-medium">Type</Label>
+                          <Select
+                            value={formData.type}
+                            onValueChange={(value: CalendarEvent['type']) => 
+                              setFormData(prev => ({ ...prev, type: value }))
+                            }
+                          >
+                            <SelectTrigger className="h-8 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="email_reminder">Email Reminder</SelectItem>
+                              <SelectItem value="call_reminder">Call Reminder</SelectItem>
+                              <SelectItem value="payment_due">Payment Due</SelectItem>
+                              <SelectItem value="follow_up">Follow Up</SelectItem>
+                              <SelectItem value="review">Review</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="priority" className="text-xs font-medium">Priority</Label>
+                          <Select
+                            value={formData.priority}
+                            onValueChange={(value: CalendarEvent['priority']) => 
+                              setFormData(prev => ({ ...prev, priority: value }))
+                            }
+                          >
+                            <SelectTrigger className="h-8 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="time" className="text-xs font-medium">Time</Label>
+                          <Input
+                            id="time"
+                            type="time"
+                            value={formData.time}
+                            onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="amount" className="text-xs font-medium">Amount ($)</Label>
+                          <Input
+                            id="amount"
+                            type="number"
+                            value={formData.amount}
+                            onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                            placeholder="0.00"
+                            step="0.01"
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="description" className="text-xs font-medium">Description</Label>
+                        <Textarea
+                          id="description"
+                          value={formData.description}
+                          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="Event description..."
+                          rows={3}
+                          className="text-sm resize-none"
+                        />
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          type="submit"
+                          size="sm"
+                          disabled={isCreatingEvent || !formData.title.trim()}
+                          className="flex-1"
+                        >
+                          {isCreatingEvent ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Plus className="w-4 h-4 mr-2" />
+                          )}
+                          Create Event
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={resetCreateForm}
+                          className="glass-card"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Events List */}
+              <ScrollArea className="h-[calc(100vh-300px)]">
                 <div className="space-y-3">
                   {selectedEvents.map((event) => (
                     <Card
@@ -426,11 +715,45 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                     >
                       <CardHeader className="pb-2">
                         <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-1">
                             {getEventTypeIcon(event.type)}
                             <CardTitle className="text-sm">{event.title}</CardTitle>
                           </div>
-                          <div className={cn("w-2 h-2 rounded-full", getPriorityColor(event.priority))} />
+                          <div className="flex items-center gap-1">
+                            <div className={cn("w-2 h-2 rounded-full", getPriorityColor(event.priority))} />
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 hover:bg-red-500/10"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEventToDelete(event);
+                                  }}
+                                >
+                                  <Trash2 className="w-3 h-3 text-red-500" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete "{event.title}"? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteEvent(event)}
+                                    className="bg-red-500 hover:bg-red-600"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0">

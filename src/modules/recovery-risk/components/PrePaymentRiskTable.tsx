@@ -106,7 +106,6 @@ export const CollectionRiskTable: React.FC<PrePaymentRiskTableProps> = ({
             </div>
             <div className="text-right">
               <div className="text-sm font-medium text-foreground">{scorePercent}%</div>
-              <div className="text-xs text-muted-foreground">{row.last_risk_level}</div>
             </div>
           </div>
         );
@@ -140,7 +139,6 @@ export const CollectionRiskTable: React.FC<PrePaymentRiskTableProps> = ({
         <div className="flex items-center justify-center">
           {value ? (
             <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-300 dark:border-red-800">
-              <AlertTriangle className="w-3 h-3 mr-1" />
               Escalated
             </Badge>
           ) : (

@@ -1,7 +1,7 @@
 // pages/PaymentPlansPage.tsx
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom'; // Para manejar query parameters
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
@@ -21,17 +21,17 @@ import { cn } from '@/shared/lib/utils';
 // Hooks and Services
 import { usePaymentPlans } from '../hooks/usePaymentPlans';
 import { PaymentPlanService } from '../store/paymentPlansApi';
+import { useRole } from '@/shared/store/roleContext'; // ✅ Importar useRole
 
 // Components
 import { PaymentPlansTable } from '../components/PaymentPlansTable';
-// import { PaymentPlanViewDialog } from '../components/PaymentPlanDialog';
-// import ActivityLogsOverview from '../components/ActivityLogsOverview';
-
 import Error from '@/shared/components/common/Error';
 import { PaymentPlanDetailsDialog } from '../components/PaymentPlanDetailsDialog';
 import { useReminder } from '../hooks/useReminder';
 
 const PaymentPlansPage: React.FC = () => {
+  const { role } = useRole(); // ✅ Obtener el rol actual
+  
   // ✅ Usar searchParams para obtener query parameters de la URL
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -53,6 +53,14 @@ const PaymentPlansPage: React.FC = () => {
     return searchParams.get('search') || "";
   });
 
+  // ✅ Configurar parámetros según el rol
+  const roleParams = React.useMemo(() => {
+    if (role === 2) {
+      return { collection: true }; // Para Manager, agregar collection=yes
+    }
+    return {}; // Para Collections Agent, sin parámetros adicionales
+  }, [role]);
+
   const {
     paymentPlans,
     activePlans,
@@ -64,7 +72,7 @@ const PaymentPlansPage: React.FC = () => {
     refetch,
     updatePaymentPlanStatus,
     error
-  } = usePaymentPlans();
+  } = usePaymentPlans({}, roleParams); // ✅ Pasar roleParams al hook
 
   const {
     sendEmailReminder
@@ -119,12 +127,9 @@ const PaymentPlansPage: React.FC = () => {
 
   const handleEmailReminder = async (analysisId: string) => {
     await sendEmailReminder(analysisId, {
-      // Puedes pasar datos adicionales si es necesario
       type: 'pre_payment_risk',
       template: 'payment_reminder'
     });
-    // Opcional: refrescar datos después del éxito
-    // refetch();
   };
 
   if (error) {
@@ -138,6 +143,12 @@ const PaymentPlansPage: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             Payment Plans Management
+            {/* ✅ Mostrar indicador visual según el rol */}
+            {role === 2 && (
+              <span className="ml-2 text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full dark:bg-blue-900/20 dark:text-blue-400">
+                Financial View
+              </span>
+            )}
           </h1>
           <p className="text-muted-foreground">
             Track and manage customer payment plans and installments
@@ -288,7 +299,7 @@ const PaymentPlansPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-foreground">
-                    {stats.denied_plans?.avg_denied_plans || 0}
+                    {PaymentPlanService.formatPercentage(stats.denied_plans?.avg_denied_plans) || 0}
                   </div>
                   <p className="text-xs text-muted-foreground">Average denials</p>
                 </CardContent>
@@ -471,7 +482,7 @@ const PaymentPlansPage: React.FC = () => {
                   onEmailReminder={handleEmailReminder}
                   onActionLogs={handleOpenActivityLogs}
                   isLoading={isLoading}
-                  initialSearch={activeTab === "all-plans" ? initialSearch : ""} // ✅ Pasar búsqueda inicial solo en el tab correcto
+                  initialSearch={activeTab === "all-plans" ? initialSearch : ""}
                 />
               </CardContent>
             </Card>

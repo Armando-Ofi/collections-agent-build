@@ -138,7 +138,7 @@ const RecoveryRiskPage: React.FC = () => {
         <Card className="glass-card hover-lift">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Invoices
+              Number of Accounts
             </CardTitle>
             <CreditCard className="w-4 h-4 text-blue-500" />
           </CardHeader>
@@ -151,7 +151,7 @@ const RecoveryRiskPage: React.FC = () => {
         <Card className="glass-card hover-lift">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Value
+              Total Portfolio Value 
             </CardTitle>
             <DollarSign className="w-4 h-4 text-green-500" />
           </CardHeader>

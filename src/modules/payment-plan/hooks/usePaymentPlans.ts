@@ -14,24 +14,39 @@ import {
   useBulkDeletePaymentPlansMutation,
 } from '../store/paymentPlansApi';
 
-export const usePaymentPlans = (initialFilters: PaymentPlanFilters = {}) => {
+// ✅ Tipo para parámetros adicionales según el rol
+interface RoleParams {
+  collection?: boolean;
+  [key: string]: any;
+}
+
+export const usePaymentPlans = (
+  initialFilters: PaymentPlanFilters = {},
+  roleParams: RoleParams = {} // ✅ Parámetros adicionales del rol
+) => {
   const [filters, setFilters] = useState<PaymentPlanFilters>(initialFilters);
   
-  // API Queries
+  // ✅ Combinar filtros normales con parámetros del rol
+  const queryParams = useMemo(() => ({
+    ...filters,
+    ...roleParams
+  }), [filters, roleParams]);
+
+  // API Queries - ✅ Usar queryParams que incluye los parámetros del rol
   const {
     data: paymentPlansData,
     isLoading: isLoadingPaymentPlans,
     isFetching: isFetchingPaymentPlans,
     error: paymentPlansError,
     refetch: refetchPaymentPlans,
-  } = useGetPaymentPlansQuery(filters);
+  } = useGetPaymentPlansQuery(queryParams);
 
   const {
     data: statsData,
     isLoading: isLoadingStats,
     error: statsError,
     refetch: refetchStats,
-  } = useGetPaymentPlanStatsQuery();
+  } = useGetPaymentPlanStatsQuery(roleParams); // ✅ También pasar roleParams a stats
 
   // Mutations
   const [createPaymentPlan, { isLoading: isCreating }] = useCreatePaymentPlanMutation();
@@ -80,7 +95,7 @@ export const usePaymentPlans = (initialFilters: PaymentPlanFilters = {}) => {
   const isFetching = isFetchingPaymentPlans;
   const error = paymentPlansError || statsError;
 
-  // Filter handlers
+  // Filter handlers - ✅ Mantener roleParams al actualizar filtros
   const updateFilters = useCallback((newFilters: Partial<PaymentPlanFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
   }, []);
@@ -178,7 +193,7 @@ export const usePaymentPlans = (initialFilters: PaymentPlanFilters = {}) => {
     activePlans,
     deniedPlans,
     defaultedPlans,
-    completedPlans, // ✅ Agregar completedPlans
+    completedPlans,
     stats,
     
     // Loading states
@@ -211,5 +226,8 @@ export const usePaymentPlans = (initialFilters: PaymentPlanFilters = {}) => {
     bulkUpdatePaymentPlans: handleBulkUpdatePaymentPlans,
     bulkDeletePaymentPlans: handleBulkDeletePaymentPlans,
     findPaymentPlanById,
+    
+    // ✅ Exponer parámetros actuales para debugging si es necesario
+    currentParams: queryParams,
   };
 };

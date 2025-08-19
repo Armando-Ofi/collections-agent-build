@@ -37,6 +37,12 @@ interface PaginatedResponse<T> {
   hasPrev: boolean;
 }
 
+// ✅ Extender PaymentPlanFilters para incluir parámetros de rol
+interface ExtendedPaymentPlanFilters extends PaymentPlanFilters {
+  collection?: boolean;
+  [key: string]: any;
+}
+
 // ✅ Función actualizada con nueva estructura de stats
 function calculatePaymentPlanStats(plans: PaymentPlan[]): PaymentPlanStats {
   const totalPlans = plans.length;
@@ -93,10 +99,10 @@ export const paymentPlansApi = baseApi.injectEndpoints({
     // ========================================================================
     
     // GET /payment-plans/ - Lista paginada con filtros
-    getPaymentPlans: builder.query<PaymentPlan[], PaymentPlanFilters>({
-      query: (filters = {}) => ({
-        url: ENDPOINTS.PAYMENT_PLANS,
-        params: {
+    getPaymentPlans: builder.query<PaymentPlan[], ExtendedPaymentPlanFilters>({
+      query: (filters = {}) => {
+        // ✅ Construir parámetros incluyendo collection
+        const params: Record<string, any> = {
           search: filters.search,
           status: filters.status,
           has_discount: filters.hasDiscount,
@@ -107,8 +113,25 @@ export const paymentPlansApi = baseApi.injectEndpoints({
           max_amount: filters.amountRange?.max,
           page: filters.page || 1,
           limit: filters.limit || 50,
-        },
-      }),
+        };
+
+        // ✅ Agregar parámetro collection si está presente
+        if (filters.collection) {
+          params.collection = 'true';
+        }
+
+        // ✅ Limpiar parámetros undefined/null
+        Object.keys(params).forEach(key => {
+          if (params[key] === undefined || params[key] === null) {
+            delete params[key];
+          }
+        });
+
+        return {
+          url: ENDPOINTS.PAYMENT_PLANS,
+          params,
+        };
+      },
       providesTags: (result) =>
         result
           ? [
@@ -126,18 +149,38 @@ export const paymentPlansApi = baseApi.injectEndpoints({
     }),
 
     // GET /payment-plans/stats/ - Estadísticas
-    getPaymentPlanStats: builder.query<PaymentPlanStats, void>({
-      query: () => ENDPOINTS.PAYMENT_PLAN_STATS,
+    getPaymentPlanStats: builder.query<PaymentPlanStats, { collection?: boolean } | void>({
+      query: (params = {}) => {
+        // ✅ Construir query parameters para stats
+        const queryParams: Record<string, any> = {};
+        
+        if (params && params.collection) {
+          queryParams.collection = 'true';
+        }
+
+        return {
+          url: ENDPOINTS.PAYMENT_PLAN_STATS,
+          params: queryParams,
+        };
+      },
       providesTags: [{ type: 'PaymentPlan', id: 'STATS' }],
       transformResponse: (response: PaymentPlanStats) => response,
     }),
 
     // GET /payment-plans/analytics/ - Analytics avanzados
-    getPaymentPlanAnalytics: builder.query<any, { dateRange?: string; groupBy?: string }>({
-      query: (params) => ({
-        url: ENDPOINTS.PAYMENT_PLAN_ANALYTICS,
-        params,
-      }),
+    getPaymentPlanAnalytics: builder.query<any, { dateRange?: string; groupBy?: string; collection?: boolean }>({
+      query: (params) => {
+        // ✅ Incluir collection en analytics también
+        const queryParams = { ...params };
+        if (queryParams.collection) {
+          queryParams.collection = true;
+        }
+        
+        return {
+          url: ENDPOINTS.PAYMENT_PLAN_ANALYTICS,
+          params: queryParams,
+        };
+      },
       providesTags: [{ type: 'PaymentPlan', id: 'ANALYTICS' }],
     }),
 
@@ -245,12 +288,20 @@ export const paymentPlansApi = baseApi.injectEndpoints({
     // ========================================================================
 
     // GET /payment-plans/export/ - Exportar planes
-    exportPaymentPlans: builder.mutation<Blob, PaymentPlanFilters>({
-      query: (filters) => ({
-        url: ENDPOINTS.PAYMENT_PLAN_EXPORT,
-        params: filters,
-        responseHandler: (response) => response.blob(),
-      }),
+    exportPaymentPlans: builder.mutation<Blob, ExtendedPaymentPlanFilters>({
+      query: (filters) => {
+        // ✅ Incluir collection en export también
+        const params = { ...filters };
+        if (params.collection) {
+          params.collection = true;
+        }
+        
+        return {
+          url: ENDPOINTS.PAYMENT_PLAN_EXPORT,
+          params,
+          responseHandler: (response) => response.blob(),
+        };
+      },
     }),
   }),
   overrideExisting: false,

@@ -1,6 +1,5 @@
 
 import { configureStore } from '@reduxjs/toolkit';
-import { leadsApi } from '@/modules/leads/store/leadsApi';
 import { baseApi } from '../api/apiClient';
 
 export const store = configureStore({
@@ -11,9 +10,9 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [leadsApi.util.resetApiState.type],
+        ignoredActions: [baseApi.util.resetApiState.type],
       },
-    }).concat(leadsApi.middleware),
+    }).concat(baseApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
