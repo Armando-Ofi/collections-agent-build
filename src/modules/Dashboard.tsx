@@ -11,6 +11,7 @@ import CollectionsOverview from "./overview/page/CollectionsOverview";
 import PaymentPlansPage from "./payment-plan/pages/PaymentPlanPage";
 import RecoveryRiskPage from "./recovery-risk/pages/RecoveryRiskPage";
 import FinancialOverview from "./financial-overview/page/FinancialOverview";
+import CalendarSummary from "@/shared/components/common/CalendarSummary";
 
 // Placeholder components para Rol 2 - Manager (por crear)
 const TeamPerformancePage = () => (
@@ -54,6 +55,7 @@ const DashboardRoutes = () => {
           <Route path="/overview" element={<CollectionsOverview />} />
           <Route path="/payment-plan" element={<PaymentPlansPage />} />
           <Route path="/payment-risk" element={<PrePaymentRiskPage />} />
+          <Route path="/calendar" element={<CalendarSummary />} />
         </>
       )}
 

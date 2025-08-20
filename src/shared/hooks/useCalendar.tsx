@@ -1,24 +1,21 @@
-
 // hooks/useCalendar.ts
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useToast } from "@/shared/hooks/use-toast";
 
-// Types
+// Updated types to match ScheduledActions from backend
 export interface CalendarEvent {
   id: string;
-  title: string;
-  description?: string;
-  date: string; // ISO date string
-  time?: string; // HH:mm format
-  type: 'email_reminder' | 'call_reminder' | 'payment_due' | 'follow_up' | 'review';
-  status: 'pending' | 'completed' | 'cancelled' | 'overdue';
-  priority: 'low' | 'medium' | 'high';
-  paymentPlanId: string;
-  customerName?: string;
-  amount?: number;
-  metadata?: Record<string, any>;
-  createdAt: string;
-  completedAt?: string;
+  invoice_id: number;
+  thread_id?: string | null;
+  title?: string | null;
+  description?: string | null;
+  scheduled_date?: string | null; // ISO date string
+  scheduled_time?: string | null;
+  action_type?: string | null;
+  status?: string | null;
+  metadata?: string | null;
+  created_at: string; // ISO date-time string
+  completed_at?: string | null;
 }
 
 export interface CalendarMonth {
@@ -32,8 +29,9 @@ export interface CalendarMonth {
 
 interface CalendarResponse {
   success: boolean;
-  message: string;
-  data: CalendarMonth;
+  message?: string;
+  data?: CalendarEvent[] | CalendarEvent;
+  error?: string;
 }
 
 interface UseCalendarState {
@@ -41,6 +39,7 @@ interface UseCalendarState {
   isLoading: boolean;
   selectedDate: string | null;
   selectedEvents: CalendarEvent[];
+  invoiceEvents: CalendarEvent[]; // All events for the current invoice
 }
 
 interface UseCalendarReturn {
@@ -49,18 +48,19 @@ interface UseCalendarReturn {
   isLoading: boolean;
   selectedDate: string | null;
   selectedEvents: CalendarEvent[];
+  invoiceEvents: CalendarEvent[];
   
   // Actions
-  loadMonth: (year: number, month: number) => Promise<void>;
+  loadInvoiceEvents: (invoiceId: number) => Promise<void>;
+  loadMonth: (year: number, month: number) => void;
   selectDate: (date: string) => void;
-  markEventCompleted: (eventId: string) => Promise<void>;
-  createEvent: (event: Omit<CalendarEvent, 'id' | 'createdAt'>) => Promise<void>;
-  deleteEvent: (eventId: string) => Promise<void>;
+  updateEventStatus: (actionId: string, status: string) => Promise<void>;
+  createEvent: (invoiceId: number, event: Partial<CalendarEvent>) => Promise<void>;
   
   // Navigation
-  goToNextMonth: () => Promise<void>;
-  goToPreviousMonth: () => Promise<void>;
-  goToToday: () => Promise<void>;
+  goToNextMonth: () => void;
+  goToPreviousMonth: () => void;
+  goToToday: () => void;
   
   // Utilities
   getEventsForDate: (date: string) => CalendarEvent[];
@@ -69,172 +69,193 @@ interface UseCalendarReturn {
   reset: () => void;
 }
 
-// Mock API Service
+// API Service for real backend calls
 const CalendarService = {
-  // Generate mock events for a given month
-  generateMockEvents: (year: number, month: number, paymentPlanId?: string): CalendarEvent[] => {
-    const events: CalendarEvent[] = [];
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
-    // Generate random events for the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const dateStr = date.toISOString().split('T')[0];
-      
-      // Random chance of having events on any given day
-      if (Math.random() > 0.7) {
-        const eventCount = Math.floor(Math.random() * 3) + 1;
-        
-        for (let i = 0; i < eventCount; i++) {
-          const eventTypes: CalendarEvent['type'][] = ['email_reminder', 'call_reminder', 'payment_due', 'follow_up', 'review'];
-          const statuses: CalendarEvent['status'][] = ['pending', 'completed', 'cancelled', 'overdue'];
-          const priorities: CalendarEvent['priority'][] = ['low', 'medium', 'high'];
-          
-          const randomType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-          const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-          const randomPriority = priorities[Math.floor(Math.random() * priorities.length)];
-          
-          const eventId = `${dateStr}-${randomType}-${i}`;
-          const planId = paymentPlanId || `plan-${Math.floor(Math.random() * 1000)}`;
-          
-          const hour = Math.floor(Math.random() * 12) + 8; // 8 AM to 8 PM
-          const minute = Math.floor(Math.random() * 4) * 15; // 0, 15, 30, 45
-          const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-          
-          let title = '';
-          let description = '';
-          
-          switch (randomType) {
-            case 'email_reminder':
-              title = 'Email Reminder Scheduled';
-              description = 'Send payment reminder email to customer';
-              break;
-            case 'call_reminder':
-              title = 'Call Reminder Scheduled';
-              description = 'Follow-up call for payment plan';
-              break;
-            case 'payment_due':
-              title = 'Payment Due';
-              description = 'Installment payment due date';
-              break;
-            case 'follow_up':
-              title = 'Customer Follow-up';
-              description = 'Check payment plan progress';
-              break;
-            case 'review':
-              title = 'Plan Review';
-              description = 'Review payment plan performance';
-              break;
-          }
-          
-          events.push({
-            id: eventId,
-            title,
-            description,
-            date: dateStr,
-            time,
-            type: randomType,
-            status: randomStatus,
-            priority: randomPriority,
-            paymentPlanId: planId,
-            customerName: `Customer ${Math.floor(Math.random() * 100)}`,
-            amount: Math.floor(Math.random() * 5000) + 500,
-            createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-            completedAt: randomStatus === 'completed' ? new Date().toISOString() : undefined,
-            metadata: {
-              source: 'payment_plan_system',
-              automated: Math.random() > 0.5
-            }
-          });
-        }
-      }
-    }
-    
-    return events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  },
+  baseUrl: 'https://collection-agent.api.sofiatechnology.ai', // Configure your API base URL
 
-  getMonthEvents: async (year: number, month: number, paymentPlanId?: string): Promise<CalendarResponse> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
-    
+  // GET /scheduled-actions/{invoice_id}/action_list
+  getInvoiceEvents: async (invoiceId: number): Promise<CalendarResponse> => {
     try {
-      const events = CalendarService.generateMockEvents(year, month, paymentPlanId);
-      
-      const totalEvents = events.length;
-      const pendingEvents = events.filter(e => e.status === 'pending').length;
-      const completedEvents = events.filter(e => e.status === 'completed').length;
+      const response = await fetch(`${CalendarService.baseUrl}/scheduled-actions/${invoiceId}/action_list`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization headers as needed
+          // 'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
       
       return {
         success: true,
-        message: 'Calendar events loaded successfully',
-        data: {
-          year,
-          month,
-          events,
-          totalEvents,
-          pendingEvents,
-          completedEvents
-        }
+        data: Array.isArray(data) ? data : [data],
+        message: 'Events loaded successfully'
       };
       
     } catch (error: any) {
-      throw new Error(`Error loading calendar: ${error.message}`);
+      console.error('Error fetching invoice events:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to load events',
+        data: []
+      };
     }
   },
 
-  markEventCompleted: async (eventId: string): Promise<CalendarResponse> => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    return {
-      success: true,
-      message: 'Event marked as completed',
-      data: {} as CalendarMonth
-    };
+  // POST /scheduled-actions/{invoice_id}/action_list
+  createEvent: async (invoiceId: number, event: Partial<CalendarEvent>): Promise<CalendarResponse> => {
+    try {
+      const payload = {
+        thread_id: event.thread_id || null,
+        title: event.title || null,
+        description: event.description || null,
+        scheduled_date: event.scheduled_date || null,
+        scheduled_time: event.scheduled_time || null,
+        action_type: event.action_type || null,
+        status: event.status || 'pending',
+        metadata: event.metadata || null,
+      };
+
+      const response = await fetch(`${CalendarService.baseUrl}/scheduled-actions/${invoiceId}/action_list`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization headers as needed
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data,
+        message: 'Event created successfully'
+      };
+      
+    } catch (error: any) {
+      console.error('Error creating event:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to create event'
+      };
+    }
   },
 
-  createEvent: async (event: Omit<CalendarEvent, 'id' | 'createdAt'>): Promise<CalendarResponse> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    return {
-      success: true,
-      message: 'Event created successfully',
-      data: {} as CalendarMonth
-    };
-  },
+  // PATCH /scheduled-actions/{invoice_id}/scheduled_action/{action_id}
+  updateEventStatus: async (invoiceId: number, actionId: string, status: string): Promise<CalendarResponse> => {
+    try {
+      const payload = {
+        status: status,
+        completed_at: status === 'completed' ? new Date().toISOString() : null
+      };
 
-  deleteEvent: async (eventId: string): Promise<CalendarResponse> => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    return {
-      success: true,
-      message: 'Event deleted successfully',
-      data: {} as CalendarMonth
-    };
+      const response = await fetch(`${CalendarService.baseUrl}/scheduled-actions/${invoiceId}/scheduled_action/${actionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization headers as needed
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      return {
+        success: true,
+        data: data,
+        message: 'Event updated successfully'
+      };
+      
+    } catch (error: any) {
+      console.error('Error updating event:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to update event'
+      };
+    }
   }
 };
 
-export const useCalendar = (paymentPlanId?: string): UseCalendarReturn => {
+export const useCalendar = (invoiceId?: number): UseCalendarReturn => {
   const { toast } = useToast();
   
   const [state, setState] = useState<UseCalendarState>({
     currentMonth: null,
     isLoading: false,
     selectedDate: null,
-    selectedEvents: []
+    selectedEvents: [],
+    invoiceEvents: []
   });
 
-  // Load events for a specific month
-  const loadMonth = useCallback(async (year: number, month: number) => {
+  // Use ref to track current invoice ID to prevent unnecessary reloads
+  const currentInvoiceIdRef = useRef<number | undefined>(invoiceId);
+
+  // Organize events by month for calendar display - STABLE function without dependencies
+  const organizeEventsByMonth = useCallback((events: CalendarEvent[], year: number, month: number): CalendarMonth => {
+    // Filter events for the specific month and year
+    const monthEvents = events.filter(event => {
+      if (!event.scheduled_date) return false;
+      
+      const eventDate = new Date(event.scheduled_date);
+      return eventDate.getFullYear() === year && eventDate.getMonth() === month;
+    });
+
+    const totalEvents = monthEvents.length;
+    const pendingEvents = monthEvents.filter(e => e.status === 'pending').length;
+    const completedEvents = monthEvents.filter(e => e.status === 'completed').length;
+
+    return {
+      year,
+      month,
+      events: monthEvents,
+      totalEvents,
+      pendingEvents,
+      completedEvents
+    };
+  }, []); // No dependencies - pure function
+
+  // Load events for a specific invoice - FIXED: removed state dependencies
+  const loadInvoiceEvents = useCallback(async (invoiceId: number) => {
     setState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      const response = await CalendarService.getMonthEvents(year, month, paymentPlanId);
+      const response = await CalendarService.getInvoiceEvents(invoiceId);
       
-      setState(prev => ({
-        ...prev,
-        currentMonth: response.data,
-        isLoading: false
-      }));
+      if (response.success && response.data) {
+        const events = Array.isArray(response.data) ? response.data : [response.data];
+        
+        setState(prev => {
+          // Update current month view if we have one set
+          let updatedCurrentMonth = prev.currentMonth;
+          if (prev.currentMonth) {
+            updatedCurrentMonth = organizeEventsByMonth(events, prev.currentMonth.year, prev.currentMonth.month);
+          }
+
+          return {
+            ...prev,
+            invoiceEvents: events,
+            currentMonth: updatedCurrentMonth,
+            isLoading: false
+          };
+        });
+        
+      } else {
+        throw new Error(response.error || 'Failed to load events');
+      }
       
     } catch (error: any) {
       toast({
@@ -245,47 +266,90 @@ export const useCalendar = (paymentPlanId?: string): UseCalendarReturn => {
       
       setState(prev => ({ ...prev, isLoading: false }));
     }
-  }, [paymentPlanId, toast]);
+  }, [organizeEventsByMonth, toast]); // Only stable dependencies
+
+  // Load events for a specific month (from already loaded invoice events)
+  const loadMonth = useCallback((year: number, month: number) => {
+    setState(prev => {
+      const monthData = organizeEventsByMonth(prev.invoiceEvents, year, month);
+      return { ...prev, currentMonth: monthData };
+    });
+  }, [organizeEventsByMonth]);
 
   // Select a specific date and load its events
   const selectDate = useCallback((date: string) => {
-    const eventsForDate = state.currentMonth?.events.filter(event => event.date === date) || [];
-    
-    setState(prev => ({
-      ...prev,
-      selectedDate: date,
-      selectedEvents: eventsForDate
-    }));
-  }, [state.currentMonth]);
-
-  // Mark event as completed
-  const markEventCompleted = useCallback(async (eventId: string) => {
-    try {
-      await CalendarService.markEventCompleted(eventId);
+    setState(prev => {
+      const eventsForDate = prev.currentMonth?.events.filter(event => event.scheduled_date === date) || [];
       
-      // Update local state
-      setState(prev => ({
+      return {
         ...prev,
-        currentMonth: prev.currentMonth ? {
-          ...prev.currentMonth,
-          events: prev.currentMonth.events.map(event =>
-            event.id === eventId
-              ? { ...event, status: 'completed' as const, completedAt: new Date().toISOString() }
-              : event
-          )
-        } : null,
-        selectedEvents: prev.selectedEvents.map(event =>
-          event.id === eventId
-            ? { ...event, status: 'completed' as const, completedAt: new Date().toISOString() }
-            : event
-        )
-      }));
-      
+        selectedDate: date,
+        selectedEvents: eventsForDate
+      };
+    });
+  }, []);
+
+  // Update event status
+  const updateEventStatus = useCallback(async (actionId: string, status: string) => {
+    const currentInvoiceId = currentInvoiceIdRef.current;
+    
+    if (!currentInvoiceId) {
       toast({
-        title: "Event Updated",
-        description: "Event marked as completed",
-        variant: "default",
+        title: "Error",
+        description: "Invoice ID is required to update event",
+        variant: "destructive",
       });
+      return;
+    }
+
+    try {
+      const response = await CalendarService.updateEventStatus(currentInvoiceId, actionId, status);
+      
+      if (response.success) {
+        setState(prev => {
+          // Update local state
+          const updatedEvents = prev.invoiceEvents.map(event =>
+            event.id === actionId
+              ? { 
+                  ...event, 
+                  status: status,
+                  completed_at: status === 'completed' ? new Date().toISOString() : null
+                }
+              : event
+          );
+
+          const updatedSelectedEvents = prev.selectedEvents.map(event =>
+            event.id === actionId
+              ? { 
+                  ...event, 
+                  status: status,
+                  completed_at: status === 'completed' ? new Date().toISOString() : null
+                }
+              : event
+          );
+
+          // Update current month view
+          let updatedCurrentMonth = prev.currentMonth;
+          if (prev.currentMonth) {
+            updatedCurrentMonth = organizeEventsByMonth(updatedEvents, prev.currentMonth.year, prev.currentMonth.month);
+          }
+
+          return {
+            ...prev,
+            invoiceEvents: updatedEvents,
+            selectedEvents: updatedSelectedEvents,
+            currentMonth: updatedCurrentMonth
+          };
+        });
+        
+        toast({
+          title: "Event Updated",
+          description: response.message || "Event status updated successfully",
+          variant: "default",
+        });
+      } else {
+        throw new Error(response.error || 'Failed to update event');
+      }
       
     } catch (error: any) {
       toast({
@@ -294,23 +358,25 @@ export const useCalendar = (paymentPlanId?: string): UseCalendarReturn => {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, [organizeEventsByMonth, toast]);
 
   // Create new event
-  const createEvent = useCallback(async (event: Omit<CalendarEvent, 'id' | 'createdAt'>) => {
+  const createEvent = useCallback(async (invoiceId: number, event: Partial<CalendarEvent>) => {
     try {
-      await CalendarService.createEvent(event);
+      const response = await CalendarService.createEvent(invoiceId, event);
       
-      // Reload current month
-      if (state.currentMonth) {
-        await loadMonth(state.currentMonth.year, state.currentMonth.month);
+      if (response.success) {
+        // Reload invoice events to get the latest data
+        await loadInvoiceEvents(invoiceId);
+        
+        toast({
+          title: "Event Created",
+          description: response.message || "New event added to calendar",
+          variant: "default",
+        });
+      } else {
+        throw new Error(response.error || 'Failed to create event');
       }
-      
-      toast({
-        title: "Event Created",
-        description: "New event added to calendar",
-        variant: "default",
-      });
       
     } catch (error: any) {
       toast({
@@ -319,69 +385,48 @@ export const useCalendar = (paymentPlanId?: string): UseCalendarReturn => {
         variant: "destructive",
       });
     }
-  }, [state.currentMonth, loadMonth, toast]);
-
-  // Delete event
-  const deleteEvent = useCallback(async (eventId: string) => {
-    try {
-      await CalendarService.deleteEvent(eventId);
-      
-      // Update local state
-      setState(prev => ({
-        ...prev,
-        currentMonth: prev.currentMonth ? {
-          ...prev.currentMonth,
-          events: prev.currentMonth.events.filter(event => event.id !== eventId)
-        } : null,
-        selectedEvents: prev.selectedEvents.filter(event => event.id !== eventId)
-      }));
-      
-      toast({
-        title: "Event Deleted",
-        description: "Event removed from calendar",
-        variant: "default",
-      });
-      
-    } catch (error: any) {
-      toast({
-        title: "Delete Error",
-        description: error.message || "Could not delete event",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
+  }, [loadInvoiceEvents, toast]);
 
   // Navigate to next month
-  const goToNextMonth = useCallback(async () => {
-    if (!state.currentMonth) return;
-    
-    const nextMonth = state.currentMonth.month + 1;
-    const year = nextMonth > 11 ? state.currentMonth.year + 1 : state.currentMonth.year;
-    const month = nextMonth > 11 ? 0 : nextMonth;
-    
-    await loadMonth(year, month);
-  }, [state.currentMonth, loadMonth]);
+  const goToNextMonth = useCallback(() => {
+    setState(prev => {
+      if (!prev.currentMonth) return prev;
+      
+      const nextMonth = prev.currentMonth.month + 1;
+      const year = nextMonth > 11 ? prev.currentMonth.year + 1 : prev.currentMonth.year;
+      const month = nextMonth > 11 ? 0 : nextMonth;
+      
+      const monthData = organizeEventsByMonth(prev.invoiceEvents, year, month);
+      return { ...prev, currentMonth: monthData };
+    });
+  }, [organizeEventsByMonth]);
 
   // Navigate to previous month
-  const goToPreviousMonth = useCallback(async () => {
-    if (!state.currentMonth) return;
-    
-    const prevMonth = state.currentMonth.month - 1;
-    const year = prevMonth < 0 ? state.currentMonth.year - 1 : state.currentMonth.year;
-    const month = prevMonth < 0 ? 11 : prevMonth;
-    
-    await loadMonth(year, month);
-  }, [state.currentMonth, loadMonth]);
+  const goToPreviousMonth = useCallback(() => {
+    setState(prev => {
+      if (!prev.currentMonth) return prev;
+      
+      const prevMonth = prev.currentMonth.month - 1;
+      const year = prevMonth < 0 ? prev.currentMonth.year - 1 : prev.currentMonth.year;
+      const month = prevMonth < 0 ? 11 : prevMonth;
+      
+      const monthData = organizeEventsByMonth(prev.invoiceEvents, year, month);
+      return { ...prev, currentMonth: monthData };
+    });
+  }, [organizeEventsByMonth]);
 
   // Go to current month
-  const goToToday = useCallback(async () => {
-    const today = new Date();
-    await loadMonth(today.getFullYear(), today.getMonth());
-  }, [loadMonth]);
+  const goToToday = useCallback(() => {
+    setState(prev => {
+      const today = new Date();
+      const monthData = organizeEventsByMonth(prev.invoiceEvents, today.getFullYear(), today.getMonth());
+      return { ...prev, currentMonth: monthData };
+    });
+  }, [organizeEventsByMonth]);
 
   // Get events for a specific date
   const getEventsForDate = useCallback((date: string): CalendarEvent[] => {
-    return state.currentMonth?.events.filter(event => event.date === date) || [];
+    return state.currentMonth?.events.filter(event => event.scheduled_date === date) || [];
   }, [state.currentMonth]);
 
   // Check if date has events
@@ -405,15 +450,35 @@ export const useCalendar = (paymentPlanId?: string): UseCalendarReturn => {
       currentMonth: null,
       isLoading: false,
       selectedDate: null,
-      selectedEvents: []
+      selectedEvents: [],
+      invoiceEvents: []
     });
+    currentInvoiceIdRef.current = undefined;
   }, []);
 
-  // Load current month on mount
+  // Update ref when invoiceId changes
   useEffect(() => {
-    const today = new Date();
-    loadMonth(today.getFullYear(), today.getMonth());
-  }, [loadMonth]);
+    currentInvoiceIdRef.current = invoiceId;
+  }, [invoiceId]);
+
+  // Load invoice events on mount if invoiceId is provided - FIXED: removed loadInvoiceEvents from deps
+  useEffect(() => {
+    if (invoiceId && invoiceId !== currentInvoiceIdRef.current) {
+      loadInvoiceEvents(invoiceId);
+      currentInvoiceIdRef.current = invoiceId;
+    }
+  }, [invoiceId]); // Only depend on invoiceId
+
+  // Set current month to today when invoice events are loaded and no month is set
+  useEffect(() => {
+    if (state.invoiceEvents.length > 0 && !state.currentMonth) {
+      const today = new Date();
+      setState(prev => {
+        const monthData = organizeEventsByMonth(prev.invoiceEvents, today.getFullYear(), today.getMonth());
+        return { ...prev, currentMonth: monthData };
+      });
+    }
+  }, [state.invoiceEvents.length, state.currentMonth, organizeEventsByMonth]);
 
   return {
     // States
@@ -421,13 +486,14 @@ export const useCalendar = (paymentPlanId?: string): UseCalendarReturn => {
     isLoading: state.isLoading,
     selectedDate: state.selectedDate,
     selectedEvents: state.selectedEvents,
+    invoiceEvents: state.invoiceEvents,
     
     // Actions
+    loadInvoiceEvents,
     loadMonth,
     selectDate,
-    markEventCompleted,
+    updateEventStatus,
     createEvent,
-    deleteEvent,
     
     // Navigation
     goToNextMonth,

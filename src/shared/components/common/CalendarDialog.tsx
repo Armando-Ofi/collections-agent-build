@@ -22,6 +22,12 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -58,21 +64,20 @@ import { useCalendar, type CalendarEvent } from '../../hooks/useCalendar';
 interface CalendarDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  paymentPlanId?: string;
+  invoiceId?: number;
   customerName?: string;
 }
 
 interface CreateEventFormData {
   title: string;
   description: string;
-  time: string;
-  type: CalendarEvent['type'];
-  priority: CalendarEvent['priority'];
-  amount: string;
+  scheduled_time: string;
+  action_type: string;
+  thread_id: string;
 }
 
 // Helper functions
-const getEventTypeIcon = (type: CalendarEvent['type']) => {
+const getEventTypeIcon = (type: string | null) => {
   switch (type) {
     case 'email_reminder':
       return <Mail className="w-3 h-3" />;
@@ -89,7 +94,7 @@ const getEventTypeIcon = (type: CalendarEvent['type']) => {
   }
 };
 
-const getEventTypeColor = (type: CalendarEvent['type']) => {
+const getEventTypeColor = (type: string | null) => {
   switch (type) {
     case 'email_reminder':
       return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
@@ -106,7 +111,7 @@ const getEventTypeColor = (type: CalendarEvent['type']) => {
   }
 };
 
-const getStatusIcon = (status: CalendarEvent['status']) => {
+const getStatusIcon = (status: string | null) => {
   switch (status) {
     case 'completed':
       return <CheckCircle className="w-3 h-3 text-green-500" />;
@@ -120,7 +125,7 @@ const getStatusIcon = (status: CalendarEvent['status']) => {
   }
 };
 
-const getStatusColor = (status: CalendarEvent['status']) => {
+const getStatusColor = (status: string | null) => {
   switch (status) {
     case 'completed':
       return 'bg-green-500/10 text-green-600 border-green-500/20';
@@ -134,30 +139,20 @@ const getStatusColor = (status: CalendarEvent['status']) => {
   }
 };
 
-const getPriorityColor = (priority: CalendarEvent['priority']) => {
-  switch (priority) {
-    case 'high':
-      return 'bg-red-500';
-    case 'medium':
-      return 'bg-yellow-500';
-    case 'low':
-    default:
-      return 'bg-green-500';
-  }
-};
-
-const formatEventType = (type: CalendarEvent['type']) => {
+const formatEventType = (type: string | null) => {
+  if (!type) return 'Unknown';
   return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
-const formatEventStatus = (status: CalendarEvent['status']) => {
+const formatEventStatus = (status: string | null) => {
+  if (!status) return 'Unknown';
   return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
 export const CalendarDialog: React.FC<CalendarDialogProps> = ({
   isOpen,
   onClose,
-  paymentPlanId,
+  invoiceId,
   customerName
 }) => {
   const {
@@ -165,20 +160,20 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
     isLoading,
     selectedDate,
     selectedEvents,
+    invoiceEvents,
+    loadInvoiceEvents,
     loadMonth,
     selectDate,
-    markEventCompleted,
+    updateEventStatus,
     createEvent,
-    deleteEvent,
     goToNextMonth,
     goToPreviousMonth,
     goToToday,
     getEventsForDate,
     hasEventsOnDate,
     getEventCountForDate
-  } = useCalendar(paymentPlanId);
+  } = useCalendar(invoiceId);
 
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showCreateEventForm, setShowCreateEventForm] = useState(false);
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
@@ -186,11 +181,33 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
   const [formData, setFormData] = useState<CreateEventFormData>({
     title: '',
     description: '',
-    time: '',
-    type: 'email_reminder',
-    priority: 'medium',
-    amount: ''
+    scheduled_time: '',
+    action_type: 'email_reminder',
+    thread_id: ''
   });
+
+  // Reset state when dialog closes or invoice changes
+  React.useEffect(() => {
+    if (!isOpen) {
+      // Clear all state when dialog closes
+      setShowCreateEventForm(false);
+      setEventToDelete(null);
+      setFormData({
+        title: '',
+        description: '',
+        scheduled_time: '',
+        action_type: 'email_reminder',
+        thread_id: ''
+      });
+    }
+  }, [isOpen]);
+
+  // Load events when invoice changes
+  React.useEffect(() => {
+    if (invoiceId && isOpen) {
+      loadInvoiceEvents(invoiceId);
+    }
+  }, [invoiceId, isOpen]);
 
   if (!currentMonth) {
     return null;
@@ -226,7 +243,7 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
     const year = prevMonth < 0 ? currentMonth.year - 1 : currentMonth.year;
     const month = prevMonth < 0 ? 11 : prevMonth;
     const date = new Date(year, month, day).toISOString().split('T')[0];
-    
+
     calendarDays.push({
       day,
       isCurrentMonth: false,
@@ -243,7 +260,7 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
     const today = new Date().toISOString().split('T')[0];
     const events = getEventsForDate(date);
     const eventCount = getEventCountForDate(date);
-    
+
     calendarDays.push({
       day,
       isCurrentMonth: true,
@@ -261,7 +278,7 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
     const year = nextMonth > 11 ? currentMonth.year + 1 : currentMonth.year;
     const month = nextMonth > 11 ? 0 : nextMonth;
     const date = new Date(year, month, day).toISOString().split('T')[0];
-    
+
     calendarDays.push({
       day,
       isCurrentMonth: false,
@@ -275,62 +292,60 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
   const handleDateClick = (date: string, isCurrentMonth: boolean) => {
     if (!isCurrentMonth) return;
     selectDate(date);
-    setSelectedEvent(null);
-  };
-
-  const handleEventClick = (event: CalendarEvent) => {
-    setSelectedEvent(event);
   };
 
   const handleMarkCompleted = async (eventId: string) => {
-    await markEventCompleted(eventId);
-    setSelectedEvent(null);
+    await updateEventStatus(eventId, 'completed');
+  };
+
+  const handleMarkPending = async (eventId: string) => {
+    await updateEventStatus(eventId, 'pending');
+  };
+
+  const handleMarkCancelled = async (eventId: string) => {
+    await updateEventStatus(eventId, 'cancelled');
   };
 
   const handleCreateEvent = () => {
-    if (!selectedDate) return;
+    if (!selectedDate || !invoiceId) return;
     setShowCreateEventForm(true);
     // Set default time to current time + 1 hour
     const now = new Date();
     now.setHours(now.getHours() + 1);
     const defaultTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    setFormData(prev => ({ ...prev, time: defaultTime }));
+    setFormData(prev => ({ ...prev, scheduled_time: defaultTime }));
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedDate || isCreatingEvent) return;
+    if (!selectedDate || isCreatingEvent || !invoiceId) return;
 
     setIsCreatingEvent(true);
     try {
-      await createEvent({
-        title: formData.title,
-        description: formData.description,
-        date: selectedDate,
-        time: formData.time || undefined,
-        type: formData.type,
+      await createEvent(invoiceId, {
+        title: formData.title || null,
+        description: formData.description || null,
+        scheduled_date: selectedDate,
+        scheduled_time: formData.scheduled_time || null,
+        action_type: formData.action_type || null,
         status: 'pending',
-        priority: formData.priority,
-        paymentPlanId: paymentPlanId || 'default',
-        customerName: customerName || 'Unknown Customer',
-        amount: formData.amount ? parseFloat(formData.amount) : undefined,
-        metadata: {
+        thread_id: formData.thread_id || null,
+        metadata: JSON.stringify({
           source: 'manual_entry',
           automated: false
-        }
+        })
       });
 
       // Reset form and close
       setFormData({
         title: '',
         description: '',
-        time: '',
-        type: 'email_reminder',
-        priority: 'medium',
-        amount: ''
+        scheduled_time: '',
+        action_type: 'email_reminder',
+        thread_id: ''
       });
       setShowCreateEventForm(false);
-      
+
       // Refresh the selected date to show the new event
       selectDate(selectedDate);
     } catch (error) {
@@ -340,39 +355,38 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
     }
   };
 
-  const handleDeleteEvent = async (event: CalendarEvent) => {
-    await deleteEvent(event.id);
-    setEventToDelete(null);
-    setSelectedEvent(null);
-    
-    // Refresh the selected date
-    if (selectedDate) {
-      selectDate(selectedDate);
-    }
-  };
-
   const resetCreateForm = () => {
     setFormData({
       title: '',
       description: '',
-      time: '',
-      type: 'email_reminder',
-      priority: 'medium',
-      amount: ''
+      scheduled_time: '',
+      action_type: 'email_reminder',
+      thread_id: ''
     });
     setShowCreateEventForm(false);
   };
 
+  const handleCloseDialog = () => {
+    // Clear selected date and events when closing
+    selectDate(null);
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
       <DialogContent className="max-w-7xl h-[90vh] glass-card">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-primary" />
-            Payment Plan Calendar
+            Scheduled Actions Calendar
             {customerName && (
               <Badge variant="outline" className="ml-2">
                 {customerName}
+              </Badge>
+            )}
+            {invoiceId && (
+              <Badge variant="secondary" className="ml-2">
+                Invoice #{invoiceId}
               </Badge>
             )}
           </DialogTitle>
@@ -393,11 +407,11 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                
+
                 <h2 className="text-xl font-semibold text-foreground">
                   {monthNames[currentMonth.month]} {currentMonth.year}
                 </h2>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -419,7 +433,23 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                 >
                   Today
                 </Button>
-                
+
+                {invoiceId && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => loadInvoiceEvents(invoiceId)}
+                    disabled={isLoading}
+                    className="glass-card"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      'Refresh'
+                    )}
+                  </Button>
+                )}
+
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-green-500 rounded-full" />
@@ -444,7 +474,7 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
               )}
-              
+
               <div className="grid grid-cols-7 gap-1 h-full">
                 {/* Day headers */}
                 {dayNames.map(day => (
@@ -455,7 +485,7 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                     {day}
                   </div>
                 ))}
-                
+
                 {/* Calendar days */}
                 {calendarDays.map((calDay, index) => (
                   <div
@@ -486,7 +516,7 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Event indicators */}
                     <div className="space-y-1">
                       {calDay.events.slice(0, 3).map((event, eventIndex) => (
@@ -494,16 +524,16 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                           key={event.id}
                           className={cn(
                             "px-1 py-0.5 rounded text-xs truncate cursor-pointer",
-                            getEventTypeColor(event.type)
+                            getEventTypeColor(event.action_type)
                           )}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleEventClick(event);
+                            selectDate(calDay.date);
                           }}
                         >
                           <div className="flex items-center gap-1">
-                            {getEventTypeIcon(event.type)}
-                            <span className="truncate flex-1">{event.title}</span>
+                            {getEventTypeIcon(event.action_type)}
+                            <span className="truncate flex-1">{event.title || 'Untitled'}</span>
                             {getStatusIcon(event.status)}
                           </div>
                         </div>
@@ -521,84 +551,93 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
           </div>
 
           {/* Event Details Sidebar */}
-          <div className="w-80 border-l border-border pl-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground">
-                  {selectedDate ? (
-                    `Events for ${new Date(selectedDate).toLocaleDateString()}`
-                  ) : (
-                    'Select a date'
-                  )}
-                </h3>
-                {selectedDate && (
-                  <Button
-                    size="sm"
-                    onClick={handleCreateEvent}
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Event
-                  </Button>
+          <div className="w-80 border-l border-border pl-6 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-4 flex-shrink-0">
+              <h3 className="text-lg font-semibold text-foreground">
+                {selectedDate ? (
+                  `Events for ${new Date(selectedDate).toDateString()}`
+                ) : (
+                  'Select a date'
                 )}
-              </div>
-
-              {selectedDate && selectedEvents.length === 0 && !showCreateEventForm && (
-                <div className="text-center py-8">
-                  <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground text-sm mb-4">No events on this date</p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleCreateEvent}
-                    className="glass-card"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create First Event
-                  </Button>
-                </div>
+              </h3>
+              {selectedDate && invoiceId && (
+                <Button
+                  size="sm"
+                  onClick={handleCreateEvent}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Event
+                </Button>
               )}
+            </div>
 
-              {/* Create Event Form */}
-              {showCreateEventForm && (
-                <Card className="glass-card border-primary/20">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Plus className="w-4 h-4" />
-                        Create New Event
-                      </CardTitle>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={resetCreateForm}
-                        className="h-8 w-8 p-0"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <form onSubmit={handleFormSubmit} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="title" className="text-xs font-medium">Title *</Label>
-                        <Input
-                          id="title"
-                          value={formData.title}
-                          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                          placeholder="Event title"
-                          required
-                          className="h-8 text-sm"
-                        />
+            {/* Scrollable Content */}
+            <ScrollArea className="flex-1 pr-4">
+              <div className="space-y-4">
+                {!invoiceId && (
+                  <div className="text-center py-8">
+                    <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
+                    <p className="text-muted-foreground text-sm mb-4">No invoice selected</p>
+                    <p className="text-xs text-muted-foreground">Please select an invoice to view and manage scheduled actions.</p>
+                  </div>
+                )}
+
+                {invoiceId && selectedDate && selectedEvents.length === 0 && !showCreateEventForm && (
+                  <div className="text-center py-8">
+                    <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground text-sm mb-4">No events on this date</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCreateEvent}
+                      className="glass-card"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create First Event
+                    </Button>
+                  </div>
+                )}
+
+                {/* Create Event Form */}
+                {showCreateEventForm && (
+                  <Card className="glass-card border-primary/20">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Plus className="w-4 h-4" />
+                          Create New Event
+                        </CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={resetCreateForm}
+                          className="h-8 w-8 p-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
                       </div>
-
-                      <div className="grid grid-cols-2 gap-2">
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <form onSubmit={handleFormSubmit} className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="type" className="text-xs font-medium">Type</Label>
+                          <Label htmlFor="title" className="text-xs font-medium">Title *</Label>
+                          <Input
+                            id="title"
+                            value={formData.title}
+                            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                            placeholder="Event title"
+                            required
+                            className="h-8 text-sm"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="action_type" className="text-xs font-medium">Action Type</Label>
                           <Select
-                            value={formData.type}
-                            onValueChange={(value: CalendarEvent['type']) => 
-                              setFormData(prev => ({ ...prev, type: value }))
+                            value={formData.action_type}
+                            onValueChange={(value) =>
+                              setFormData(prev => ({ ...prev, action_type: value }))
                             }
                           >
                             <SelectTrigger className="h-8 text-sm">
@@ -614,113 +653,85 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                           </Select>
                         </div>
 
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="scheduled_time" className="text-xs font-medium">Time</Label>
+                            <Input
+                              id="scheduled_time"
+                              type="time"
+                              value={formData.scheduled_time}
+                              onChange={(e) => setFormData(prev => ({ ...prev, scheduled_time: e.target.value }))}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="thread_id" className="text-xs font-medium">Thread ID</Label>
+                            <Input
+                              id="thread_id"
+                              value={formData.thread_id}
+                              onChange={(e) => setFormData(prev => ({ ...prev, thread_id: e.target.value }))}
+                              placeholder="Optional"
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                        </div>
+
                         <div className="space-y-2">
-                          <Label htmlFor="priority" className="text-xs font-medium">Priority</Label>
-                          <Select
-                            value={formData.priority}
-                            onValueChange={(value: CalendarEvent['priority']) => 
-                              setFormData(prev => ({ ...prev, priority: value }))
-                            }
+                          <Label htmlFor="description" className="text-xs font-medium">Description</Label>
+                          <Textarea
+                            id="description"
+                            value={formData.description}
+                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                            placeholder="Event description..."
+                            rows={3}
+                            className="text-sm resize-none"
+                          />
+                        </div>
+
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            type="submit"
+                            size="sm"
+                            disabled={isCreatingEvent || !formData.title.trim()}
+                            className="flex-1"
                           >
-                            <SelectTrigger className="h-8 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="low">Low</SelectItem>
-                              <SelectItem value="medium">Medium</SelectItem>
-                              <SelectItem value="high">High</SelectItem>
-                            </SelectContent>
-                          </Select>
+                            {isCreatingEvent ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Plus className="w-4 h-4 mr-2" />
+                            )}
+                            Create Event
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={resetCreateForm}
+                            className="glass-card"
+                          >
+                            Cancel
+                          </Button>
                         </div>
-                      </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="time" className="text-xs font-medium">Time</Label>
-                          <Input
-                            id="time"
-                            type="time"
-                            value={formData.time}
-                            onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                            className="h-8 text-sm"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="amount" className="text-xs font-medium">Amount ($)</Label>
-                          <Input
-                            id="amount"
-                            type="number"
-                            value={formData.amount}
-                            onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-                            placeholder="0.00"
-                            step="0.01"
-                            className="h-8 text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="description" className="text-xs font-medium">Description</Label>
-                        <Textarea
-                          id="description"
-                          value={formData.description}
-                          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                          placeholder="Event description..."
-                          rows={3}
-                          className="text-sm resize-none"
-                        />
-                      </div>
-
-                      <div className="flex gap-2 pt-2">
-                        <Button
-                          type="submit"
-                          size="sm"
-                          disabled={isCreatingEvent || !formData.title.trim()}
-                          className="flex-1"
-                        >
-                          {isCreatingEvent ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Plus className="w-4 h-4 mr-2" />
-                          )}
-                          Create Event
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={resetCreateForm}
-                          className="glass-card"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Events List */}
-              <ScrollArea className="h-[calc(100vh-300px)]">
+                {/* Events List */}
                 <div className="space-y-3">
                   {selectedEvents.map((event) => (
                     <Card
                       key={event.id}
-                      className={cn(
-                        "glass-card cursor-pointer hover:shadow-md transition-all",
-                        selectedEvent?.id === event.id && "ring-2 ring-primary"
-                      )}
-                      onClick={() => handleEventClick(event)}
+                      className="glass-card hover:shadow-md transition-all"
                     >
                       <CardHeader className="pb-2">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2 flex-1">
-                            {getEventTypeIcon(event.type)}
-                            <CardTitle className="text-sm">{event.title}</CardTitle>
+                            {getEventTypeIcon(event.action_type)}
+                            <CardTitle className="text-sm">{event.title || 'Untitled Event'}</CardTitle>
                           </div>
                           <div className="flex items-center gap-1">
-                            <div className={cn("w-2 h-2 rounded-full", getPriorityColor(event.priority))} />
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
@@ -739,13 +750,13 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete Event</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to delete "{event.title}"? This action cannot be undone.
+                                    Are you sure you want to delete "{event.title || 'this event'}"? This action cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                                   <AlertDialogAction
-                                    onClick={() => handleDeleteEvent(event)}
+                                    onClick={() => setEventToDelete(null)}
                                     className="bg-red-500 hover:bg-red-600"
                                   >
                                     Delete
@@ -760,27 +771,65 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Clock className="w-3 h-3" />
-                            {event.time || 'All day'}
+                            {event.scheduled_time || 'All day'}
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
-                            <Badge className={cn("text-xs", getEventTypeColor(event.type))}>
-                              {formatEventType(event.type)}
-                            </Badge>
-                            <Badge className={cn("text-xs", getStatusColor(event.status))}>
-                              {getStatusIcon(event.status)}
-                              {formatEventStatus(event.status)}
-                            </Badge>
+                            <span
+                              className={cn(
+                                "text-xs font-medium",
+                              )}
+                            >
+                              {formatEventType(event.action_type)}
+                            </span>
+
+                            {/* Status Badge with Dropdown Actions */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  type="button"
+                                  className={cn(
+                                    "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                                    getStatusColor(event.status)
+                                  )}
+                                >
+                                  {getStatusIcon(event.status)}
+                                  {formatEventStatus(event.status)}
+                                  <MoreHorizontal className="w-3 h-3 ml-1 opacity-70" />
+                                </button>
+                              </DropdownMenuTrigger>
+
+                              <DropdownMenuContent align="end" sideOffset={6} className="w-48">
+                                {event.status === 'Scheduled' && (
+                                  <DropdownMenuItem onClick={() => handleMarkCompleted(event.id)} className="text-green-600">
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    Mark as Completed
+                                  </DropdownMenuItem>
+                                )}
+                                {event.status === 'completed' && (
+                                  <DropdownMenuItem onClick={() => handleMarkPending(event.id)} className="text-yellow-600">
+                                    <Clock className="w-4 h-4 mr-2" />
+                                    Mark as Pending
+                                  </DropdownMenuItem>
+                                )}
+                                {event.status !== 'cancelled' && (
+                                  <DropdownMenuItem onClick={() => handleMarkCancelled(event.id)} className="text-red-600">
+                                    <XCircle className="w-4 h-4 mr-2" />
+                                    Cancel Event
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
-                          
+
                           {event.description && (
                             <p className="text-xs text-muted-foreground">{event.description}</p>
                           )}
-                          
+
                           <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{event.customerName}</span>
-                            {event.amount && (
-                              <span className="font-medium">${event.amount.toLocaleString()}</span>
+                            <span>Invoice #{event.invoice_id}</span>
+                            {event.thread_id && (
+                              <span className="font-mono text-xs">Thread: {event.thread_id}</span>
                             )}
                           </div>
                         </div>
@@ -788,36 +837,8 @@ export const CalendarDialog: React.FC<CalendarDialogProps> = ({
                     </Card>
                   ))}
                 </div>
-              </ScrollArea>
-
-              {/* Event Actions */}
-              {selectedEvent && (
-                <div className="border-t border-border pt-4 space-y-3">
-                  <h4 className="font-medium text-foreground">Event Actions</h4>
-                  <div className="space-y-2">
-                    {selectedEvent.status === 'pending' && (
-                      <Button
-                        size="sm"
-                        className="w-full"
-                        onClick={() => handleMarkCompleted(selectedEvent.id)}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Mark as Completed
-                      </Button>
-                    )}
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full glass-card"
-                      onClick={() => setSelectedEvent(null)}
-                    >
-                      Close Details
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            </ScrollArea>
           </div>
         </div>
       </DialogContent>

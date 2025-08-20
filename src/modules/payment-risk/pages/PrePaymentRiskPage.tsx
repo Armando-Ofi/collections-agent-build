@@ -13,7 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn } from '@/shared/lib/utils';
-import { useNavigate } from 'react-router-dom'; // Asumiendo que usas React Router
+import { useNavigate } from 'react-router-dom';
 
 // Hooks and Services
 import { usePrePaymentRisk } from '../hooks/usePrePaymentRisk';
@@ -34,14 +34,13 @@ const PrePaymentRiskPage: React.FC = () => {
   // ✅ Estados para el dialog de análisis de riesgo
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<number | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  
+
   // ✅ Estados para el dialog de activity logs
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
   const [isViewActivityLogsOpen, setIsViewActivityLogsOpen] = useState(false);
 
-  const [selectedCalendarPlan, setSelectedCalendarPlan] = useState(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  
+
   const [activeTab, setActiveTab] = useState("risk-analysis");
 
   // Hook para navegación
@@ -83,41 +82,34 @@ const PrePaymentRiskPage: React.FC = () => {
     navigate(`/payment-plan?tab=all-plans&search=PP_${paymentPlanId}`);
   };
 
-  const handleOpenCalendar = (paymentPlanId: number) => {
-    setSelectedCalendarPlan(paymentPlanId);
+  const handleOpenCalendar = (invoiceId: number) => {
+    setSelectedInvoiceId(invoiceId);
     setIsCalendarOpen(true);
   };
-
   const handleCloseCalendar = () => {
     setIsCalendarOpen(false);
-    setSelectedCalendarPlan(null);
+    setSelectedInvoiceId(null);
   };
 
-  const handleUpdatePaymentPlan = async (id: number, plan: string) => {
+  /*const handleUpdatePaymentPlan = async (id: number, plan: string) => {
     await updatePaymentPlan(id, plan);
     setIsViewDialogOpen(false);
     setSelectedAnalysisId(null);
-  };
+  };*/
 
   const handleCallReminder = async (analysisId: number) => {
     await sendCallReminder(analysisId, {
-      // Puedes pasar datos adicionales si es necesario
       type: 'pre_payment_risk',
       priority: 'high'
     });
-    // Opcional: refrescar datos después del éxito
-    // refetch();
   };
 
   // ✅ Manejar recordatorio por email
   const handleEmailReminder = async (analysisId: number) => {
     await sendEmailReminder(analysisId, {
-      // Puedes pasar datos adicionales si es necesario
       type: 'pre_payment_risk',
       template: 'payment_reminder'
     });
-    // Opcional: refrescar datos después del éxito
-    // refetch();
   };
 
   // ✅ Cerrar dialog de análisis de riesgo
@@ -230,8 +222,8 @@ const PrePaymentRiskPage: React.FC = () => {
                   onEmailReminder={handleEmailReminder}
                   onView={handleView}
                   onActionLogs={handleOpenActivityLogs}
-                  onStatusClick={handleStatusClick} // ✅ Nueva prop
-                  onOpenCalendar={handleOpenCalendar} // Nueva prop para abrir el calendario
+                  onStatusClick={handleStatusClick}
+                  onOpenCalendar={handleOpenCalendar}
                   isLoading={isLoading}
                 />
               </CardContent>
@@ -314,8 +306,8 @@ const PrePaymentRiskPage: React.FC = () => {
                   onEmailReminder={handleEmailReminder}
                   onView={handleView}
                   onActionLogs={handleOpenActivityLogs}
-                  onStatusClick={handleStatusClick} // ✅ Nueva prop también aquí
-                  onOpenCalendar={handleOpenCalendar} // Nueva prop para abrir el calendario
+                  onStatusClick={handleStatusClick}
+                  onOpenCalendar={handleOpenCalendar}
                   isLoading={isLoading}
                 />
               </CardContent>
@@ -338,9 +330,11 @@ const PrePaymentRiskPage: React.FC = () => {
         onClose={handleCloseActivityLogs}
       />
 
-      <CalendarDialog 
+      {/* Calendar Dialog */}
+      <CalendarDialog
         isOpen={isCalendarOpen}
         onClose={handleCloseCalendar}
+        invoiceId={selectedInvoiceId ?? undefined} // usa ??, no || (evita romper si invoiceId === 0)
       />
     </div>
   );

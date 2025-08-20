@@ -21,6 +21,7 @@ import {
   PieChart,
   FileText,
   Activity,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { useRole } from "@/shared/store/roleContext";
@@ -45,6 +46,12 @@ const agentNavigation = [
     url: "/payment-plan",
     icon: Wallet,
     description: "Clients Payment Plans",
+  },
+  {
+    title: "AI Actions",
+    url: "/calendar",
+    icon: Calendar,
+    description: "AI Actions Calendar",
   }
 ];
 
