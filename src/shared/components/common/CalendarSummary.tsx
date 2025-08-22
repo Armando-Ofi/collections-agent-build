@@ -10,6 +10,23 @@ import {
   CollapsibleTrigger,
 } from "@/shared/components/ui/collapsible";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
+import {
   ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
@@ -22,7 +39,9 @@ import {
   Loader2,
   ChevronDown,
   ChevronRight as ChevronRightIcon,
-  Scale
+  Scale,
+  Play,
+  MoreHorizontal
 } from "lucide-react";
 import { cn } from '@/shared/lib/utils';
 import { useCalendarSummary, type DaySummary, type ActionItem } from '../../hooks/useCalendarSummary';
@@ -95,13 +114,83 @@ const formatStatus = (status: string) => {
   return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
-// Action Item Component - Made more compact
+// Status Badge with Dropdown Component
+interface StatusBadgeProps {
+  action: ActionItem;
+  isUpdating: boolean;
+  onStatusChange: (actionId: string, invoiceId: number, status: string) => void;
+}
+
+const StatusBadge: React.FC<StatusBadgeProps> = ({ action, isUpdating, onStatusChange }) => {
+  const handleStatusChange = (newStatus: string) => {
+    if (action.id) {
+      onStatusChange(action.id, action.id, newStatus);
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          disabled={isUpdating}
+          className={cn(
+            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs cursor-pointer hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
+            getStatusColor(action.status)
+          )}
+        >
+          {isUpdating ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : (
+            getStatusIcon(action.status)
+          )}
+          {formatStatus(action.status)}
+          <MoreHorizontal className="w-3 h-3 ml-1 opacity-70" />
+        </button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end" sideOffset={6} className="w-48">
+        {action.status !== 'scheduled' && (
+          <DropdownMenuItem 
+            onClick={() => handleStatusChange('scheduled')}
+            className="text-yellow-600"
+          >
+            <Clock className="w-4 h-4 mr-2" />
+            Mark as Scheduled
+          </DropdownMenuItem>
+        )}
+        {action.status !== 'completed' && (
+          <DropdownMenuItem 
+            onClick={() => handleStatusChange('completed')}
+            className="text-green-600"
+          >
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Mark as Completed
+          </DropdownMenuItem>
+        )}
+        {action.status !== 'cancelled' && (
+          <DropdownMenuItem 
+            onClick={() => handleStatusChange('cancelled')}
+            className="text-red-600"
+          >
+            <XCircle className="w-4 h-4 mr-2" />
+            Cancel Action
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+// Action Item Component - Updated with status dropdown
 interface ActionItemProps {
   action: ActionItem;
   type: 'emails' | 'calls' | 'legal_actions';
+  isUpdating: boolean;
+  onStatusChange: (actionId: string, invoiceId: number, status: string) => void;
 }
 
-const ActionItemCard: React.FC<ActionItemProps> = ({ action, type }) => {
+const ActionItemCard: React.FC<ActionItemProps> = ({ action, type, isUpdating, onStatusChange }) => {
   return (
     <Card className="glass-card hover:shadow-sm transition-all">
       <CardContent className="p-3">
@@ -111,18 +200,11 @@ const ActionItemCard: React.FC<ActionItemProps> = ({ action, type }) => {
               {getActionIcon(type)}
               <h4 className="text-sm font-medium truncate">{action.title}</h4>
             </div>
-            <Badge
-              variant="outline"
-              className={cn(
-                "text-xs flex-shrink-0",
-                getStatusColor(action.status)
-              )}
-            >
-              <div className="flex items-center gap-1">
-                {getStatusIcon(action.status)}
-                {formatStatus(action.status)}
-              </div>
-            </Badge>
+            <StatusBadge 
+              action={action}
+              isUpdating={isUpdating}
+              onStatusChange={onStatusChange}
+            />
           </div>
           
           {action.description && (
@@ -131,6 +213,9 @@ const ActionItemCard: React.FC<ActionItemProps> = ({ action, type }) => {
           
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span className="truncate">ID: {action.id}</span>
+            {action.id && (
+              <span className="truncate">Invoice: #{action.id}</span>
+            )}
           </div>
         </div>
       </CardContent>
@@ -138,15 +223,89 @@ const ActionItemCard: React.FC<ActionItemProps> = ({ action, type }) => {
   );
 };
 
-// Actions Accordion Component
+// Trigger Actions Button Component
+interface TriggerActionsButtonProps {
+  selectedDate: string | null;
+  scheduledCount: number;
+  isTriggeringActions: boolean;
+  onTrigger: (date: string) => void;
+}
+
+const TriggerActionsButton: React.FC<TriggerActionsButtonProps> = ({
+  selectedDate,
+  scheduledCount,
+  isTriggeringActions,
+  onTrigger
+}) => {
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
+
+  if (!selectedDate || scheduledCount === 0) {
+    return null;
+  }
+
+  const handleTrigger = () => {
+    onTrigger(selectedDate);
+    setShowConfirmDialog(false);
+  };
+
+  return (
+    <>
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <AlertDialogTrigger asChild>
+            <Button
+              size="sm"
+              className="bg-primary hover:bg-primary/90 shadow-lg animate-pulse"
+              disabled={isTriggeringActions}
+            >
+              {isTriggeringActions ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Play className="w-4 h-4 mr-2" />
+              )}
+              Trigger Actions ({scheduledCount})
+            </Button>
+          </AlertDialogTrigger>
+          
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Trigger Scheduled Actions</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to trigger {scheduledCount} scheduled action{scheduledCount !== 1 ? 's' : ''} for {new Date(selectedDate).toDateString()}?
+                <br /><br />
+                This will execute all scheduled actions for this date and cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleTrigger}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Trigger Actions
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </>
+  );
+};
+
+// Actions Accordion Component - Updated with new props
 interface ActionsAccordionProps {
   selectedDateActions: any;
   isLoadingActions: boolean;
+  isUpdatingAction: string | null;
+  onStatusChange: (actionId: string, invoiceId: number, status: string) => void;
 }
 
 const ActionsAccordion: React.FC<ActionsAccordionProps> = ({ 
   selectedDateActions, 
-  isLoadingActions 
+  isLoadingActions,
+  isUpdatingAction,
+  onStatusChange
 }) => {
   const [openSections, setOpenSections] = React.useState<Set<string>>(new Set(['emails']));
 
@@ -237,6 +396,8 @@ const ActionsAccordion: React.FC<ActionsAccordionProps> = ({
                       key={action.id} 
                       action={action} 
                       type={section.key}
+                      isUpdating={isUpdatingAction === action.id}
+                      onStatusChange={onStatusChange}
                     />
                   ))}
                 </div>
@@ -263,11 +424,16 @@ const CalendarSummary: React.FC = () => {
     selectedDate,
     selectedDateActions,
     isLoadingActions,
+    isUpdatingAction,
+    isTriggeringActions,
     selectDate,
+    updateActionStatus,
+    triggerScheduledActions,
     goToNextMonth,
     goToPreviousMonth,
     goToToday,
-    getSummaryForDay
+    getSummaryForDay,
+    getScheduledActionsCount
   } = useCalendarSummary();
 
   if (!currentMonth) {
@@ -364,6 +530,8 @@ const CalendarSummary: React.FC = () => {
     }),
     { total: 0, emails: 0, calls: 0, legal: 0 }
   );
+
+  const scheduledActionsCount = getScheduledActionsCount();
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -506,7 +674,7 @@ const CalendarSummary: React.FC = () => {
         </div>
 
         {/* Actions Sidebar - Fixed width with controlled height */}
-        <div className="w-96 border-l border-border pl-6 flex flex-col overflow-hidden">
+        <div className="w-96 border-l border-border pl-6 flex flex-col overflow-hidden relative">
           <div className="flex-shrink-0 flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">
               {selectedDate ? (
@@ -523,9 +691,19 @@ const CalendarSummary: React.FC = () => {
               <ActionsAccordion 
                 selectedDateActions={selectedDateActions}
                 isLoadingActions={isLoadingActions}
+                isUpdatingAction={isUpdatingAction}
+                onStatusChange={updateActionStatus}
               />
             </ScrollArea>
           </div>
+
+          {/* Floating Trigger Button */}
+          <TriggerActionsButton
+            selectedDate={selectedDate}
+            scheduledCount={scheduledActionsCount}
+            isTriggeringActions={isTriggeringActions}
+            onTrigger={triggerScheduledActions}
+          />
         </div>
       </div>
     </div>
